@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using OperationLog.Database.UnitOfWork;
 
 namespace OperationLog.BusinessLogic.Services
@@ -13,14 +14,14 @@ namespace OperationLog.BusinessLogic.Services
             Database = database;
         }
 
-        public IEnumerable<T> GetAll()
+        public List<T> GetAll()
         {
-            return Database.GetRepository<T>().GetAll();
+            return Database.GetRepository<T>().GetAll().ToList();
         }
 
-        public IEnumerable<T> Find(Func<T, bool> predicate)
+        public List<T> Find(Func<T, bool> predicate)
         {
-            return Database.GetRepository<T>().Find(predicate);
+            return Database.GetRepository<T>().Find(predicate).ToList();
         }
 
         public T Get(Guid id)

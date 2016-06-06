@@ -1,10 +1,13 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace OpertaionLog.Database.Objects.Entities
 {
     public class User
     {
-        public Guid UserId { get; set; }
-        public string FullName { get; set; }
+        public short UserId { get; set; }
+        public string UserName { get; set; }
+        public string NetworkUserName { get; set; }
+        public virtual UserType UserType { get; set; }
+        public List<Operation> Operations { get; set; }
     }
 }

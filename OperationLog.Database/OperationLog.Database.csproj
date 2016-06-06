@@ -50,6 +50,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configurations\DepartmentConfiguration.cs" />
+    <Compile Include="Configurations\OperationConfiguration.cs" />
+    <Compile Include="Configurations\OperationTypeConfiguration.cs" />
+    <Compile Include="Configurations\ProgramConfiguration.cs" />
+    <Compile Include="Configurations\UserConfiguration.cs" />
+    <Compile Include="Configurations\UserTypeConfiguration.cs" />
     <Compile Include="DatabaseContext\OperationDatabaseContext.cs" />
     <Compile Include="DatabaseContext\OperationDatabaseInitializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,7 +74,6 @@
       <Name>OpertaionLog.Database.Objects</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

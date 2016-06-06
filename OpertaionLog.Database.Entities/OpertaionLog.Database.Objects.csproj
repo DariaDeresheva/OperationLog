@@ -41,6 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Department.cs" />
+    <Compile Include="Entities\Program.cs" />
+    <Compile Include="Entities\Operation.cs" />
+    <Compile Include="Entities\OperationType.cs" />
+    <Compile Include="Entities\UserType.cs" />
     <Compile Include="Entities\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

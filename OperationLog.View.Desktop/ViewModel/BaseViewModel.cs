@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Ninject;
 using OperationLog.BusinessLogic.Services;
 using OperationLog.Presentation.Desktop.Infrastructure;
@@ -15,7 +14,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             {
                 using (var service = NinjectKernel.Kernel.Get<IService<User>>())
                 {
-                    return service.GetAll().ToList();
+                    return service.GetAll();
                 }
             }
         }
