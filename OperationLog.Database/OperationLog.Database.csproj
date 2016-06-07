@@ -57,7 +57,11 @@
     <Compile Include="Configurations\UserConfiguration.cs" />
     <Compile Include="Configurations\UserTypeConfiguration.cs" />
     <Compile Include="DatabaseContext\OperationDatabaseContext.cs" />
-    <Compile Include="DatabaseContext\OperationDatabaseInitializer.cs" />
+    <Compile Include="Migrations\201606061440328_InitialCreate.cs" />
+    <Compile Include="Migrations\201606061440328_InitialCreate.Designer.cs">
+      <DependentUpon>201606061440328_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\CommonRepository.cs" />
     <Compile Include="Repositories\IRepository.cs" />
@@ -73,6 +77,11 @@
       <Project>{0d12d5d7-c9ad-4bde-8986-06946b43e358}</Project>
       <Name>OpertaionLog.Database.Objects</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201606061440328_InitialCreate.resx">
+      <DependentUpon>201606061440328_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

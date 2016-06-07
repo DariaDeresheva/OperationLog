@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows.Input;
-using JetBrains.Annotations;
 
 namespace OperationLog.Presentation.Desktop.Infrastructure
 {
@@ -9,12 +8,12 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
         private readonly Action<object> _execute;
         private readonly Predicate<object> _canExecute;
 
-        public Command([NotNull] Action<object> execute)
+        public Command(Action<object> execute)
             : this(execute, null)
         {
         }
 
-        public Command([NotNull] Action<object> execute, Predicate<object> canExecute)
+        public Command(Action<object> execute, Predicate<object> canExecute)
         {
             _execute = execute;
             _canExecute = canExecute;

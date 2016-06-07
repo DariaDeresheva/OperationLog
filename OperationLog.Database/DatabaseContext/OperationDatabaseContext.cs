@@ -1,5 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Reflection;
+using OperationLog.Database.Migrations;
 using OpertaionLog.Database.Objects.Entities;
 
 namespace OperationLog.Database.DatabaseContext
@@ -15,7 +16,8 @@ namespace OperationLog.Database.DatabaseContext
 
         static OperationDatabaseContext()
         {
-            System.Data.Entity.Database.SetInitializer(new OperationDatabaseInitializer());
+            System.Data.Entity.Database.SetInitializer(
+                new MigrateDatabaseToLatestVersion<OperationDatabaseContext, Configuration>());
         }
 
         public OperationDatabaseContext()
