@@ -19,7 +19,7 @@
     </ma:MetroWindow.Resources>
     <ma:MetroWindow.RightWindowCommands>
         <ma:WindowCommands>
-            <ToggleButton IsChecked="{Binding ElementName=Filters, Path=IsOpen}" Cursor="Hand">
+            <ToggleButton IsChecked="{Binding ElementName=Filters, Path=IsOpen}">
                 <StackPanel Orientation="Horizontal">
                     <Rectangle Width="14" Height="14"
                                Fill="{Binding RelativeSource={RelativeSource AncestorType=ToggleButton}, Path=Foreground}">

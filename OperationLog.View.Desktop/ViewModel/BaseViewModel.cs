@@ -32,12 +32,6 @@ namespace OperationLog.Presentation.Desktop.ViewModel
         {
             new LineSeries
             {
-                Values = new ChartValues<double> { double.NaN, 3, 3, 3, 3, 3, double.NaN},
-                PointDiameter = 20,
-                Fill = Brushes.Transparent
-            },
-            new LineSeries
-            {
                 Values = new ChartValues<double> { double.NaN, 2, 2, double.NaN, 2, 2, double.NaN},
                 PointDiameter = 20,
                 Fill = Brushes.Transparent

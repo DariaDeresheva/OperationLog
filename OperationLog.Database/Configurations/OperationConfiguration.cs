@@ -13,12 +13,6 @@ namespace OperationLog.Database.Configurations
                 .IsFixedLength()
                 .IsUnicode(false);
 
-            Property(operation => operation.TableDescription)
-                .HasColumnType("char")
-                .HasMaxLength(50)
-                .IsFixedLength()
-                .IsUnicode(false);
-
             Property(operation => operation.StationAddress)
                 .HasColumnType("char")
                 .HasMaxLength(6)
