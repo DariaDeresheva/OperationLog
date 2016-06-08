@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -44,10 +43,12 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                 await (Application.Current.MainWindow as MetroWindow).ShowProgressAsync("Please wait...", "Sync....");
             progressAlert.SetIndeterminate();
 
-            await Task.Run(() => Thread.Sleep(5000));
+            await Task.Run(() => Thread.Sleep(500));
             await progressAlert.CloseAsync();
         }
 
         public Command Command => new Command(async data => await SyncAll());
+
+        public string TextSearchQuery { get; set; }
     }
 }

@@ -14,9 +14,11 @@
                 Icon="../Resources/Journal.ico"
                 ShowIconOnTitleBar="True"
                 Height="600" Width="1000">
+    
     <ma:MetroWindow.Resources>
         <vm:BaseViewModel x:Key="BaseViewModel" />
     </ma:MetroWindow.Resources>
+    
     <ma:MetroWindow.RightWindowCommands>
         <ma:WindowCommands>
             <ToggleButton IsChecked="{Binding ElementName=Filters, Path=IsOpen}">
@@ -32,23 +34,42 @@
             </ToggleButton>
         </ma:WindowCommands>
     </ma:MetroWindow.RightWindowCommands>
+    
     <ma:MetroWindow.Flyouts>
         <ma:FlyoutsControl>
             <ma:Flyout x:Name="Filters" DataContext="{StaticResource BaseViewModel}" Position="Right" Width="183" Theme="Accent">
                 <StackPanel>
-                    <Button Command="{Binding Command}">Async Wait Test</Button>
+                    <TextBox Text="{Binding TextSearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                             ma:TextBoxHelper.UseFloatingWatermark="True"
+                             ma:TextBoxHelper.ClearTextButton="True"
+                             ma:TextBoxHelper.Watermark="Поиск...">
+                        <TextBox.Style>
+                            <Style BasedOn="{StaticResource SearchMetroTextBox}" TargetType="{x:Type TextBox}">
+                                <Style.Triggers>
+                                    <Trigger Property="ma:TextBoxHelper.HasText" Value="True">
+                                        <Setter Property="ma:TextBoxHelper.ButtonTemplate" Value="{StaticResource ChromelessButtonTemplate}" />
+                                        <Setter Property="ma:TextBoxHelper.ButtonContent" Value="r" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                    
                 </StackPanel>
             </ma:Flyout>
         </ma:FlyoutsControl>
     </ma:MetroWindow.Flyouts>
-    <Grid DataContext="{StaticResource BaseViewModel}">
-        <lc:CartesianChart Series="{Binding SeriesCollection}">
-            <lc:CartesianChart.AxisX>
-                <lc:Axis Separator="{x:Static lc:DefaultAxes.CleanSeparator}"/>
-            </lc:CartesianChart.AxisX>
-            <lc:CartesianChart.AxisY>
-                <lc:Axis />
-            </lc:CartesianChart.AxisY>
-        </lc:CartesianChart>
-    </Grid>
+
+    <ma:MetroContentControl>
+        <Grid DataContext="{StaticResource BaseViewModel}">
+            <lc:CartesianChart Series="{Binding SeriesCollection}">
+                <lc:CartesianChart.AxisX>
+                    <lc:Axis Separator="{x:Static lc:DefaultAxes.CleanSeparator}"/>
+                </lc:CartesianChart.AxisX>
+                <lc:CartesianChart.AxisY>
+                    <lc:Axis />
+                </lc:CartesianChart.AxisY>
+            </lc:CartesianChart>
+        </Grid>
+    </ma:MetroContentControl>
 </ma:MetroWindow>
