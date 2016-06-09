@@ -7,7 +7,7 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
     {
         public override void Load()
         {
-            Bind(typeof(IService<>)).To(typeof(CommonService<>));
+            Bind(typeof(IService)).To(typeof(CommonService));
         }
     }
 }

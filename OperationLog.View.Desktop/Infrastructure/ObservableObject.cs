@@ -6,7 +6,7 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void UpdateOnGui(string propertyName)
+        protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

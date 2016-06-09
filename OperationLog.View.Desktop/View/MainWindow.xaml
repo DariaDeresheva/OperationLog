@@ -9,14 +9,18 @@
                 mc:Ignorable="d"
                 ResizeMode="CanResizeWithGrip"
                 WindowStartupLocation="CenterScreen"
-                TitleCaps="False"
+                TitleCharacterCasing="Normal"
                 Title="Визуализатор операционного журнала" 
                 Icon="../Resources/Journal.ico"
                 ShowIconOnTitleBar="True"
-                Height="600" Width="1000">
+                MinHeight="400" MinWidth="700">
     
     <ma:MetroWindow.Resources>
         <vm:BaseViewModel x:Key="BaseViewModel" />
+        <Style BasedOn="{StaticResource MetroDataGridRow}" TargetType="{x:Type DataGridRow}" />
+        <Style BasedOn="{StaticResource MetroDataGrid}" TargetType="{x:Type DataGrid}">
+            <Setter Property="AlternatingRowBackground" Value="{DynamicResource GrayBrush10}" />
+        </Style>
     </ma:MetroWindow.Resources>
     
     <ma:MetroWindow.RightWindowCommands>
@@ -37,9 +41,10 @@
     
     <ma:MetroWindow.Flyouts>
         <ma:FlyoutsControl>
-            <ma:Flyout x:Name="Filters" DataContext="{StaticResource BaseViewModel}" Position="Right" Width="183" Theme="Accent">
-                <StackPanel>
-                    <TextBox Text="{Binding TextSearchQuery, UpdateSourceTrigger=PropertyChanged}"
+            <ma:Flyout x:Name="Filters" DataContext="{StaticResource BaseViewModel}" Position="Right" Width="500" Theme="Accent">
+                <DockPanel>
+                    <TextBox DockPanel.Dock="Top" 
+                             Text="{Binding TextSearchQuery, UpdateSourceTrigger=PropertyChanged}"
                              ma:TextBoxHelper.UseFloatingWatermark="True"
                              ma:TextBoxHelper.ClearTextButton="True"
                              ma:TextBoxHelper.Watermark="Поиск...">
@@ -47,27 +52,148 @@
                             <Style BasedOn="{StaticResource SearchMetroTextBox}" TargetType="{x:Type TextBox}">
                                 <Style.Triggers>
                                     <Trigger Property="ma:TextBoxHelper.HasText" Value="True">
-                                        <Setter Property="ma:TextBoxHelper.ButtonTemplate" Value="{StaticResource ChromelessButtonTemplate}" />
                                         <Setter Property="ma:TextBoxHelper.ButtonContent" Value="r" />
+                                        <Setter Property="ma:TextBoxHelper.ButtonContentTemplate" Value="{x:Null}" />
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBox.Style>
                     </TextBox>
-                    
-                </StackPanel>
+
+                    <ma:DateTimePicker DockPanel.Dock="Top" 
+                                       SelectedDate="{Binding DateFrom, Mode=TwoWay}"
+                                       SelectedTime="{Binding TimeFrom, Mode=TwoWay}"
+                                       HandVisibility="All"
+                                       PickerVisibility="All"></ma:DateTimePicker>
+
+                    <ma:DateTimePicker DockPanel.Dock="Top" 
+                                       SelectedDate="{Binding DateTo, Mode=TwoWay}"
+                                       SelectedTime="{Binding TimeTo, Mode=TwoWay}"
+                                       HandVisibility="All"
+                                       PickerVisibility="All"></ma:DateTimePicker>
+
+                    <ComboBox DockPanel.Dock="Top" ItemsSource="{Binding GridOptions}" SelectedItem="{Binding GridOptionSelected}" DisplayMemberPath="Key" IsReadOnly="True" />
+
+                    <DataGrid DockPanel.Dock="Top" 
+                              ItemsSource="{Binding UsersGrid}"
+                              Visibility="{Binding GridOptions[Пользователи].Visibility}"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="All"
+                              CanUserAddRows="False"
+                              CanUserSortColumns="False"
+                              SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Binding="{Binding IsSelected}" ElementStyle="{DynamicResource MetroDataGridCheckBox}">
+                                <DataGridCheckBoxColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding DataContext.GridOptions[Пользователи].AllSelected,RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridCheckBoxColumn.HeaderTemplate>
+                            </DataGridCheckBoxColumn>
+                            <DataGridTextColumn Binding="{Binding Instanse.UserName}" Header="ФИО" />
+                            <DataGridTextColumn Binding="{Binding Instanse.UserType.TypeName}" Header="Уровень доступа" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <DataGrid DockPanel.Dock="Top" 
+                              ItemsSource="{Binding UserTypesGrid}"
+                              Visibility="{Binding GridOptions[Уровни доступа].Visibility}"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="All"
+                              CanUserAddRows="False"
+                              CanUserSortColumns="False"
+                              SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Binding="{Binding IsSelected}" ElementStyle="{DynamicResource MetroDataGridCheckBox}">
+                                <DataGridCheckBoxColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding DataContext.GridOptions[Уровни доступа].AllSelected,RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridCheckBoxColumn.HeaderTemplate>
+                            </DataGridCheckBoxColumn>
+                            <DataGridTextColumn Binding="{Binding Instanse.TypeName}" Header="Уровень доступа" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <DataGrid DockPanel.Dock="Top"
+                              ItemsSource="{Binding ProgramsGrid}"
+                              Visibility="{Binding GridOptions[Программы].Visibility}"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="All"
+                              CanUserAddRows="False"
+                              CanUserSortColumns="False"
+                              SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Binding="{Binding IsSelected}" ElementStyle="{DynamicResource MetroDataGridCheckBox}">
+                                <DataGridCheckBoxColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding DataContext.GridOptions[Программы].AllSelected,RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridCheckBoxColumn.HeaderTemplate>
+                            </DataGridCheckBoxColumn>
+                            <DataGridTextColumn Binding="{Binding Instanse.ProgramName}" Header="Программа" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <DataGrid DockPanel.Dock="Top" 
+                              ItemsSource="{Binding DepartmentsGrid}"
+                              Visibility="{Binding GridOptions[Филиалы].Visibility}"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="All"
+                              CanUserAddRows="False"
+                              CanUserSortColumns="False"
+                              SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Binding="{Binding IsSelected}" ElementStyle="{DynamicResource MetroDataGridCheckBox}">
+                                <DataGridCheckBoxColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding DataContext.GridOptions[Филиалы].AllSelected,RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridCheckBoxColumn.HeaderTemplate>
+                            </DataGridCheckBoxColumn>
+                            <DataGridTextColumn Binding="{Binding Instanse.DepartmentName}" Header="Филиал" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <DataGrid DockPanel.Dock="Top" 
+                              ItemsSource="{Binding OperationTypesGrid}"
+                              Visibility="{Binding GridOptions[Типы операций].Visibility}"
+                              AutoGenerateColumns="False"
+                              HeadersVisibility="All"
+                              CanUserAddRows="False"
+                              CanUserSortColumns="False"
+                              SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Binding="{Binding IsSelected}" ElementStyle="{DynamicResource MetroDataGridCheckBox}">
+                                <DataGridCheckBoxColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding DataContext.GridOptions[Типы операций].AllSelected,RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                    </DataTemplate>
+                                </DataGridCheckBoxColumn.HeaderTemplate>
+                            </DataGridCheckBoxColumn>
+                            <DataGridTextColumn Binding="{Binding Instanse.TypeName}" Header="Тип операции" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
             </ma:Flyout>
         </ma:FlyoutsControl>
     </ma:MetroWindow.Flyouts>
 
-    <ma:MetroContentControl>
-        <Grid DataContext="{StaticResource BaseViewModel}">
-            <lc:CartesianChart Series="{Binding SeriesCollection}">
-                <lc:CartesianChart.AxisX>
-                    <lc:Axis Separator="{x:Static lc:DefaultAxes.CleanSeparator}"/>
+    <ma:MetroContentControl DataContext="{StaticResource BaseViewModel}">
+        <Grid>
+            <lc:CartesianChart Series="{Binding SeriesCollection}" Zoom="X">
+                <lc:CartesianChart.ToolTip>
+                    <ToolTip>=)</ToolTip>
+                </lc:CartesianChart.ToolTip>
+                <lc:CartesianChart.AxisX >
+                    <lc:Axis LabelFormatter="{Binding DateTimeFormatter}" Separator="{x:Static lc:DefaultAxes.CleanSeparator}"/>
                 </lc:CartesianChart.AxisX>
                 <lc:CartesianChart.AxisY>
-                    <lc:Axis />
+                    <lc:Axis LabelFormatter="{Binding YFormatter}" MaxValue="{Binding YAxisMax}" MinValue="{Binding YAxisMin}">
+                        <lc:Axis.Separator>
+                            <lc:Separator Step="1" StrokeThickness="1" StrokeDashArray="3"></lc:Separator>
+                        </lc:Axis.Separator>
+                    </lc:Axis>
                 </lc:CartesianChart.AxisY>
             </lc:CartesianChart>
         </Grid>

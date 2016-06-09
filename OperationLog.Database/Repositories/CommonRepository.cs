@@ -15,7 +15,7 @@ namespace OperationLog.Database.Repositories
             _database = context;
         }
 
-        public IEnumerable<T> Find(Func<T, bool> predicate)
+        public IEnumerable<T> GetAllWhere(Func<T, bool> predicate)
         {
             return _database.Set<T>().Where(predicate);
         }
