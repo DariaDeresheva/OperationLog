@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using LiveCharts;
 using LiveCharts.Configurations;
+using LiveCharts.Helpers;
 using LiveCharts.Wpf;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using Ninject;
 using OperationLog.BusinessLogic.Services;
 using OperationLog.Presentation.Desktop.Infrastructure;
@@ -18,21 +25,53 @@ namespace OperationLog.Presentation.Desktop.ViewModel
     {
         private readonly IService _service = NinjectKernel.Kernel.Get<IService>();
 
-        private readonly List<Selectable<User>> _users;
-        private readonly List<Selectable<UserType>> _userTypes;
-        private readonly List<Selectable<OperationType>> _operationTypes;
-        private readonly List<Selectable<Program>> _programs;
-        private readonly List<Selectable<Department>> _departments;
+        private List<Selectable<User>> _users;
+        private List<Selectable<UserType>> _userTypes;
+        private List<Selectable<OperationType>> _operationTypes;
+        private List<Selectable<Program>> _programs;
+        private List<Selectable<Department>> _departments;
+
+        private Func<Operation, bool> OperationTypeSelected
+            =>
+                operation =>
+                    _operationTypes.Any(
+                        operationType =>
+                            operationType.Instanse.OperationTypeId == operation.OperationType.OperationTypeId &&
+                            operationType.IsSelected);
+
+        private Func<Operation, bool> UserSelected
+            => operation => _users.Any(user => user.Instanse.UserId == operation.User.UserId && user.IsSelected);
+
+
+        private Func<Operation, bool> UserTypeSelected
+            =>
+                operation =>
+                    _userTypes.Any(
+                        userType =>
+                            userType.Instanse.UserTypeId == operation.User.UserType.UserTypeId && userType.IsSelected);
+
+        private Func<Operation, bool> ProgramSelected
+            =>
+                operation =>
+                    _programs.Any(
+                        program => program.Instanse.ProgramId == operation.Program.ProgramId && program.IsSelected);
+
+        private Func<Operation, bool> DepartmentSelected
+            =>
+                operation =>
+                    _departments.Any(
+                        department =>
+                            department.Instanse.DepartmentId == operation.Department.DepartmentId &&
+                            department.IsSelected);
 
         private KeyValuePair<string, GridOption> _gridOptionSelected;
 
-        private string _textSearchQuery;
+        private SeriesCollection _seriesCollection;
 
-        private DateTime _dateFrom = DateTime.Now.AddDays(-7);
-        private DateTime _dateTo = DateTime.Now;
-        private TimeSpan _timeFrom = DateTime.Now.TimeOfDay;
-        private TimeSpan _timeTo = DateTime.Now.TimeOfDay;
+        private readonly CartesianMapper<OperationWithIndex> _cartesianMapper =
+            Mappers.Xy<OperationWithIndex>().X(x => x.Operation.DateTime.Ticks).Y(y => y.Index);
 
+        private string _textSearchQuery = string.Empty;
         public string TextSearchQuery
         {
             get { return _textSearchQuery; }
@@ -43,54 +82,29 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
-        public DateTime DateFrom
-        {
-            get { return _dateFrom; }
-            set
-            {
-                _dateFrom = value;
-                OnPropertyChanged(nameof(DateFrom));
-            }
-        }
+        public DateTime DateFrom { get; set; } = DateTime.Now.AddDays(-7);
+        public DateTime DateTo { get; set; } = DateTime.Now;
 
-        public DateTime DateTo
-        {
-            get { return _dateTo; }
-            set
-            {
-                _dateTo = value;
-                OnPropertyChanged(nameof(DateTo));
-            }
-        }
+        public TimeSpan TimeFrom { get; set; } = DateTime.Now.TimeOfDay;
+        public TimeSpan TimeTo { get; set; } = DateTime.Now.TimeOfDay;
 
-        public TimeSpan TimeFrom
-        {
-            get { return _timeFrom; }
-            set
-            {
-                _timeFrom = value;
-                OnPropertyChanged(nameof(TimeFrom));
-            }
-        }
+        public DateTime DateTimeFrom => DateFrom.Date.Add(TimeFrom);
+        public DateTime DateTimeTo => DateTo.Date.Add(TimeTo);
 
-        public TimeSpan TimeTo
-        {
-            get { return _timeTo; }
-            set
-            {
-                _timeTo = value;
-                OnPropertyChanged(nameof(TimeTo));
-            }
-        }
+        public ObservableCollection<Selectable<User>> UsersGrid { get; set; } =
+            new ObservableCollection<Selectable<User>>();
 
-        public DateTime DateTimeFrom => DateFrom.Add(TimeFrom);
-        public DateTime DateTimeTo => DateTo.Add(TimeTo);
+        public ObservableCollection<Selectable<UserType>> UserTypesGrid { get; set; } =
+            new ObservableCollection<Selectable<UserType>>();
 
-        public IEnumerable<Selectable<User>> UsersGrid { get; set; }
-        public IEnumerable<Selectable<UserType>> UserTypesGrid { get; set; }
-        public IEnumerable<Selectable<OperationType>> OperationTypesGrid { get; set; }
-        public IEnumerable<Selectable<Program>> ProgramsGrid { get; set; }
-        public IEnumerable<Selectable<Department>> DepartmentsGrid { get; set; }
+        public ObservableCollection<Selectable<OperationType>> OperationTypesGrid { get; set; } =
+            new ObservableCollection<Selectable<OperationType>>();
+
+        public ObservableCollection<Selectable<Program>> ProgramsGrid { get; set; } =
+            new ObservableCollection<Selectable<Program>>();
+
+        public ObservableCollection<Selectable<Department>> DepartmentsGrid { get; set; } =
+            new ObservableCollection<Selectable<Department>>();
 
         public IDictionary<string, GridOption> GridOptions { get; }
 
@@ -104,34 +118,22 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
-        public IEnumerable<Operation> Operations
-            =>
-                _service.GetAllWhere<Operation>(
-                    operation =>
-                        operation.DateTime >= DateTimeFrom &&
-                        operation.DateTime <= DateTimeTo &&
-                        _users.Single(user => user.Instanse.UserId == operation.User.UserId).IsSelected &&
-                        _departments.Single(department => department.Instanse.DepartmentId == operation.Department.DepartmentId).IsSelected &&
-                        _programs.Single(program => program.Instanse.ProgramId == operation.Program.ProgramId).IsSelected &&
-                        _operationTypes.Single(operationType => operationType.Instanse.OperationTypeId == operation.OperationType.OperationTypeId).IsSelected &&
-                        _userTypes.Single(userType => userType.Instanse.UserTypeId == operation.User.UserType.UserTypeId).IsSelected);
-
-        private SeriesCollection _seriesCollection;
         public SeriesCollection SeriesCollection
         {
             get { return _seriesCollection; }
             set
             {
                 _seriesCollection = value;
+                OnPropertyChanged(nameof(YAxisMax));
                 OnPropertyChanged(nameof(SeriesCollection));
             }
         }
 
-        public Func<double, string> DateTimeFormatter => value => new DateTime((long)value).ToString("dd.MM.yyyy hh:mm:ss");
-
         public double YAxisMax => SeriesCollection.Count;
-
         public double YAxisMin { get; } = -1;
+
+        public Func<double, string> DateTimeFormatter
+            => value => new DateTime((long) value).ToString("dd.MM.yyyy HH:mm:ss");
 
         public Func<double, string> YFormatter
             =>
@@ -139,156 +141,132 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     SeriesCollection.FirstOrDefault(
                         collection =>
                             collection.Values.Cast<OperationWithIndex>()
-                                .Any(operation => Math.Abs(operation.Index - value) < 1e-9))?
-                        .Values.Cast<OperationWithIndex>()
+                                .Any(operation => (int) operation.Index == (int) value))
+                        ?.Values.Cast<OperationWithIndex>()
                         .First()
                         .Operation.User.UserName.Trim() ?? string.Empty;
+
+        public ICommand ApplyFilter => new Command(async _ =>
+        {
+            SeriesCollection = GetSeriesCollection();
+            await WaitChartUpdateAsync();
+        });
 
         public BaseViewModel()
         {
             PrepareEventHandlers();
+            FillCollectionsFromDatabase();
 
-            _users = _service.GetAll<User>().Select(user => new Selectable<User>(user)).ToList();
-            _operationTypes =
-                _service.GetAll<OperationType>().Select(type => new Selectable<OperationType>(type)).ToList();
-            _programs = _service.GetAll<Program>().Select(program => new Selectable<Program>(program)).ToList();
-            _departments =
-                _service.GetAll<Department>().Select(department => new Selectable<Department>(department)).ToList();
-            _userTypes = _service.GetAll<UserType>().Select(type => new Selectable<UserType>(type)).ToList();
-
-            GridOptions = GetGridOptions()
-                .OrderBy(option => option.GridName)
-                .ToDictionary(key => key.GridName, value => value);
-
+            GridOptions = GetGridOptions();
             GridOptionSelected = GridOptions.FirstOrDefault();
-            TextSearchQuery = string.Empty;
+
+            SeriesCollection = GetSeriesCollection();
+        }
+
+        private void FillCollectionsFromDatabase()
+        {
+            _userTypes =
+                _service.GetAll<UserType>()
+                    .Select(type => new Selectable<UserType>(type))
+                    .OrderBy(type => type.Instanse.TypeName)
+                    .ToList();
+
+            _programs =
+                _service.GetAll<Program>()
+                    .Select(program => new Selectable<Program>(program))
+                    .OrderBy(program => program.Instanse.ProgramName)
+                    .ToList();
+
+            _users =
+                _service.GetAll<User>()
+                    .Select(user => new Selectable<User>(user))
+                    .OrderBy(user => user.Instanse.UserName)
+                    .ToList();
+
+            _operationTypes =
+                _service.GetAll<OperationType>()
+                    .Select(type => new Selectable<OperationType>(type))
+                    .OrderBy(type => type.Instanse.TypeName)
+                    .ToList();
+
+            _departments =
+                _service.GetAll<Department>()
+                    .Select(department => new Selectable<Department>(department))
+                    .OrderBy(department => department.Instanse.DepartmentName)
+                    .ToList();
+        }
+
+        private IEnumerable<Operation> SelectOperations() => _service.GetAllWhere<Operation>(
+            operation =>
+                operation.DateTime >= DateTimeFrom &&
+                operation.DateTime <= DateTimeTo &&
+                OperationTypeSelected(operation) &&
+                UserTypeSelected(operation) &&
+                DepartmentSelected(operation) &&
+                ProgramSelected(operation) &&
+                UserSelected(operation));
+
+        private static async Task WaitChartUpdateAsync()
+        {
+            var progressAlert =
+                await
+                    (Application.Current.MainWindow as MetroWindow)
+                        .ShowProgressAsync("Пожалуйста подождите...", "Применение фильтров....");
+
+            progressAlert.SetIndeterminate();
+            await Task.Run(() => Thread.Sleep(500));
+            await progressAlert.CloseAsync();
+        }
+
+        private SeriesCollection NewSeriesCollection()
+        {
+            return new SeriesCollection(_cartesianMapper);
         }
 
         private SeriesCollection GetSeriesCollection()
         {
-            var mapper = Mappers.Xy<OperationWithIndex>().X(x => x.Operation.DateTime.Ticks).Y(y => y.Index);
-            var seriesCollection = new SeriesCollection(mapper);
+            var operationsFilteredOrdered = SelectOperations()
+                .OrderByDescending(operation => operation.User.UserName)
+                .ThenBy(operation => operation.DateTime);
 
-            var operationsByUser =
-                Operations
-                    .OrderByDescending(operation => operation.User.UserName)
-                    .ThenBy(operation => operation.DateTime)
-                    .GroupBy(operation => operation.User.UserId)
-                    .Select((group, index) => new { Group = group, Index = index });
+            var operationsByUser = operationsFilteredOrdered
+                .GroupBy(operation => operation.User.UserId)
+                .Select((group, index) => new {Group = group, Index = index});
 
-            foreach (var operationGroup in operationsByUser)
-            {
-                var values = new ChartValues<OperationWithIndex>();
-                foreach (var operation in operationGroup.Group)
-                {
-                    values.Add(new OperationWithIndex { Index = operationGroup.Index, Operation = operation });
-                }
-                seriesCollection.Add(new LineSeries
-                {
-                    Values = values,
-                    PointDiameter = 20,
-                    StrokeThickness = 3,
-                    Fill = Brushes.Transparent
-                });
-            }
+            var collectionOfChartValues =
+                operationsByUser.Select(
+                    operationGroup =>
+                        operationGroup.Group.Select(
+                            operation => new OperationWithIndex {Index = operationGroup.Index, Operation = operation})
+                            .AsChartValues());
+
+            var chartSeries =
+                collectionOfChartValues.Select(values => NewLineSeries(values, values.First().Operation.User.UserName));
+
+            var seriesCollection = NewSeriesCollection();
+            seriesCollection.AddRange(chartSeries);
             return seriesCollection;
         }
 
-        private IEnumerable<GridOption> GetGridOptions()
+        private static LineSeries NewLineSeries(IChartValues values, string title) => new LineSeries
         {
-            return new List<GridOption>
+            Values = values,
+            PointDiameter = 22,
+            StrokeThickness = 4,
+            Fill = Brushes.Transparent,
+            LabelPoint = point => ((OperationWithIndex) point.Instance).Operation.OperationType.TypeName,
+            Title = title
+        };
+
+        private IDictionary<string, GridOption> GetGridOptions()
+        {
+            return new Dictionary<string, GridOption>
             {
-                new GridOption
-                {
-                    GridName = "Пользователи",
-                    SelectAllHandler = value =>
-                    {
-                        UsersGrid = UsersGrid.Select(user => new Selectable<User>(user.Instanse, value));
-                        OnPropertyChanged(nameof(UsersGrid));
-                    },
-                    SearchHandler = new Command(_ =>
-                    {
-                        UsersGrid =
-                            _users.Where(
-                                user =>
-                                    user.Instanse.UserName.StartsWith(TextSearchQuery,
-                                        StringComparison.InvariantCultureIgnoreCase));
-                        OnPropertyChanged(nameof(UsersGrid));
-                    })
-                },
-                new GridOption
-                {
-                    GridName = "Уровни доступа",
-                    SelectAllHandler = value =>
-                    {
-                        UserTypesGrid = UserTypesGrid.Select(type => new Selectable<UserType>(type.Instanse, value));
-                        OnPropertyChanged(nameof(UserTypesGrid));
-                    },
-                    SearchHandler = new Command(_ =>
-                    {
-                        UserTypesGrid =
-                            _userTypes.Where(
-                                type =>
-                                    type.Instanse.TypeName.StartsWith(TextSearchQuery,
-                                        StringComparison.InvariantCultureIgnoreCase));
-                        OnPropertyChanged(nameof(UserTypesGrid));
-                    })
-                },
-                new GridOption
-                {
-                    GridName = "Программы",
-                    SelectAllHandler = value =>
-                    {
-                        ProgramsGrid = ProgramsGrid.Select(program => new Selectable<Program>(program.Instanse, value));
-                        OnPropertyChanged(nameof(ProgramsGrid));
-                    },
-                    SearchHandler = new Command(_ =>
-                    {
-                        ProgramsGrid =
-                            _programs.Where(
-                                program =>
-                                    program.Instanse.ProgramName.StartsWith(TextSearchQuery,
-                                        StringComparison.InvariantCultureIgnoreCase));
-                        OnPropertyChanged(nameof(ProgramsGrid));
-                    })
-                },
-                new GridOption
-                {
-                    GridName = "Филиалы",
-                    SelectAllHandler = value =>
-                    {
-                        DepartmentsGrid =
-                            DepartmentsGrid.Select(department => new Selectable<Department>(department.Instanse, value));
-                        OnPropertyChanged(nameof(DepartmentsGrid));
-                    },
-                    SearchHandler = new Command(_ =>
-                    {
-                        DepartmentsGrid =
-                            _departments.Where(
-                                department =>
-                                    department.Instanse.DepartmentName.StartsWith(TextSearchQuery,
-                                        StringComparison.InvariantCultureIgnoreCase));
-                        OnPropertyChanged(nameof(DepartmentsGrid));
-                    })
-                },
-                new GridOption
-                {
-                    GridName = "Типы операций",
-                    SelectAllHandler = value =>
-                    {
-                        OperationTypesGrid = OperationTypesGrid.Select(type => new Selectable<OperationType>(type.Instanse, value));
-                        OnPropertyChanged(nameof(OperationTypesGrid));
-                    },
-                    SearchHandler = new Command(_ =>
-                    {
-                        OperationTypesGrid =
-                            _operationTypes.Where(
-                                type =>
-                                    type.Instanse.TypeName.StartsWith(TextSearchQuery,
-                                        StringComparison.InvariantCultureIgnoreCase));
-                        OnPropertyChanged(nameof(OperationTypesGrid));
-                    })
-                },
+                ["Пользователи"] = GridOption.Create(UsersGrid, _users, user => user.UserName),
+                ["Программы"] = GridOption.Create(ProgramsGrid, _programs, program => program.ProgramName),
+                ["Типы операций"] = GridOption.Create(OperationTypesGrid, _operationTypes, type => type.TypeName),
+                ["Уровни доступа"] = GridOption.Create(UserTypesGrid, _userTypes, type => type.TypeName),
+                ["Филиалы"] = GridOption.Create(DepartmentsGrid, _departments, department => department.DepartmentName),
             };
         }
 
@@ -298,17 +276,11 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             {
                 switch (e.PropertyName)
                 {
-                    case nameof(DateFrom):
-                        SeriesCollection = GetSeriesCollection();
-                        break;
                     case nameof(TextSearchQuery):
-                        GridOptionSelected.Value.SearchHandler.Execute(null);
+                        GridOptionSelected.Value.SearchHandler.Execute(TextSearchQuery);
                         break;
                     case nameof(GridOptionSelected):
-                        foreach (var gridOption in GridOptions.Except(new[] { GridOptionSelected }))
-                        {
-                            gridOption.Value.Visibility = Visibility.Collapsed;
-                        }
+                        GridOptions.ForEach(option => option.Value.Visibility = Visibility.Collapsed);
                         GridOptionSelected.Value.Visibility = Visibility.Visible;
                         TextSearchQuery = string.Empty;
                         break;

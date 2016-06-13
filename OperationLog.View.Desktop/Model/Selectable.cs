@@ -2,12 +2,9 @@
 
 namespace OperationLog.Presentation.Desktop.Model
 {
-    public class Selectable<T> : ObservableObject where T : class, new() 
+    public class Selectable<T> : ObservableObject
     {
         private bool _isSelected = true;
-
-        public T Instanse { get; set; }
-
         public bool IsSelected
         {
             get { return _isSelected; }
@@ -17,6 +14,8 @@ namespace OperationLog.Presentation.Desktop.Model
                 OnPropertyChanged(nameof(IsSelected));
             }
         }
+
+        public T Instanse { get; set; }
 
         public Selectable(T instanse, bool selected) : this(instanse)
         {

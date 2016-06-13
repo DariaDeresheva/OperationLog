@@ -1,4 +1,5 @@
 ﻿using Ninject;
+using Ninject.Modules;
 using OperationLog.BusinessLogic.Infrastructure;
 
 namespace OperationLog.Presentation.Desktop.Infrastructure
@@ -14,7 +15,13 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
 
         private static IKernel CreateApplicationKernel()
         {
-            return new StandardKernel(new DatabaseInjection("OperationsDatabase"), new ServiceInjection());
+            var modules = new INinjectModule[]
+            {
+                new DatabaseInjection("OperationsDatabase"),
+                new ServiceInjection(),
+                new TextSearchRuleInjection()
+            };
+            return new StandardKernel(modules);
         }
     }
 }
