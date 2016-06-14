@@ -19,10 +19,7 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
             _canExecute = canExecute;
         }
 
-        public bool CanExecute(object parameter)
-        {
-            return _canExecute?.Invoke(parameter) ?? true;
-        }
+        public bool CanExecute(object parameter) => _canExecute?.Invoke(parameter) ?? true;
 
         public event EventHandler CanExecuteChanged
         {
@@ -30,9 +27,6 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public void Execute(object parameter)
-        {
-            _execute(parameter);
-        }
+        public void Execute(object parameter) => _execute(parameter);
     }
 }

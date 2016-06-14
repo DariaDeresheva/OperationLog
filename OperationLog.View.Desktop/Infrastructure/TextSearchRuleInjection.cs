@@ -5,9 +5,6 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
 {
     public class TextSearchRuleInjection : NinjectModule
     {
-        public override void Load()
-        {
-            Bind<ITextSearchRule>().To<TextSearchStartsWith>();
-        }
+        public override void Load() => Bind<ITextSearchRule>().To<TextSearchStartsWith>();
     }
 }

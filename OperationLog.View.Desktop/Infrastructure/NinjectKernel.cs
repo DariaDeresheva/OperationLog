@@ -14,19 +14,13 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
             Kernel = CreateApplicationKernel();
         }
 
-        private static IKernel CreateApplicationKernel()
-        {
-            return new StandardKernel(GetModules());
-        }
+        private static IKernel CreateApplicationKernel() => new StandardKernel(GetModules());
 
-        private static INinjectModule[] GetModules()
+        private static INinjectModule[] GetModules() => new INinjectModule[]
         {
-            return new INinjectModule[]
-            {
-                new DatabaseInjection(ConfigurationManager.ConnectionStrings["OperationDatabase"].ConnectionString),
-                new ServiceInjection(),
-                new TextSearchRuleInjection()
-            };
-        }
+            new DatabaseInjection(ConfigurationManager.ConnectionStrings["OperationDatabase"].ConnectionString),
+            new ServiceInjection(),
+            new TextSearchRuleInjection()
+        };
     }
 }

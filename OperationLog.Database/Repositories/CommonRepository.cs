@@ -15,34 +15,16 @@ namespace OperationLog.Database.Repositories
             _database = context;
         }
 
-        public IEnumerable<T> GetAllWhere(Func<T, bool> predicate)
-        {
-            return _database.Set<T>().Where(predicate);
-        }
+        public IEnumerable<T> GetAllWhere(Func<T, bool> predicate) => _database.Set<T>().Where(predicate);
 
-        public T Get(Guid id)
-        {
-            return _database.Set<T>().Find(id);
-        }
+        public T Get(Guid id) => _database.Set<T>().Find(id);
 
-        public void Create(T item)
-        {
-            _database.Set<T>().Add(item);
-        }
+        public void Create(T item) => _database.Set<T>().Add(item);
 
-        public void Update(T item)
-        {
-            _database.Entry(item).State = EntityState.Modified;
-        }
+        public void Update(T item) => _database.Entry(item).State = EntityState.Modified;
 
-        public void Delete(T item)
-        {
-            _database.Set<T>().Remove(item);
-        }
+        public void Delete(T item) => _database.Set<T>().Remove(item);
 
-        public IEnumerable<T> GetAll()
-        {
-            return _database.Set<T>();
-        }
+        public IEnumerable<T> GetAll() => _database.Set<T>();
     }
 }

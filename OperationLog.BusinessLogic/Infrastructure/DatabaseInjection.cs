@@ -13,8 +13,6 @@ namespace OperationLog.BusinessLogic.Infrastructure
         }
 
         public override void Load()
-        {
-            Bind<IUnitOfWork>().To<OperationDatabase>().WithConstructorArgument(_connectionString);
-        }
+            => Bind<IUnitOfWork>().To<OperationDatabase>().WithConstructorArgument(_connectionString);
     }
 }

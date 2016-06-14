@@ -15,15 +15,9 @@ namespace OperationLog.Database.UnitOfWork
             _database = new OperationDatabaseContext(connectionString);
         }
 
-        public IRepository<T> GetRepository<T>() where T : class
-        {
-            return new CommonRepository<T>(_database);
-        }
+        public IRepository<T> GetRepository<T>() where T : class => new CommonRepository<T>(_database);
 
-        public void SaveChanges()
-        {
-            _database.SaveChanges();
-        }
+        public void SaveChanges() => _database.SaveChanges();
 
         public virtual void Dispose(bool disposing)
         {

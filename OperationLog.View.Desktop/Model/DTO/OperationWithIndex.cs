@@ -1,6 +1,6 @@
 ﻿using OpertaionLog.Database.Objects.Entities;
 
-namespace OperationLog.Presentation.Desktop.Model
+namespace OperationLog.Presentation.Desktop.Model.DTO
 {
     public class OperationWithIndex
     {

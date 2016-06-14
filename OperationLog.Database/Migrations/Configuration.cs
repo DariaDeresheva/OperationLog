@@ -1,8 +1,10 @@
+using OperationLog.Database.DatabaseContext;
+
 namespace OperationLog.Database.Migrations
 {
     using System.Data.Entity.Migrations;
 
-    public sealed class Configuration : DbMigrationsConfiguration<DatabaseContext.OperationDatabaseContext>
+    public sealed class Configuration : DbMigrationsConfiguration<OperationDatabaseContext>
     {
         public Configuration()
         {

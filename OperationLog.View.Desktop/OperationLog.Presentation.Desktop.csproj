@@ -87,22 +87,25 @@
     </ApplicationDefinition>
     <Compile Include="Infrastructure\TextSearchRuleInjection.cs" />
     <Compile Include="Model\ITextSearchRule.cs" />
-    <Compile Include="Model\OperationWithIndex.cs" />
+    <Compile Include="Model\DTO\OperationWithIndex.cs" />
     <Compile Include="Model\Selectable.cs" />
     <Compile Include="Model\GridOption.cs" />
     <Compile Include="Model\TextSearchStartsWith.cs" />
-    <Compile Include="ViewModel\BaseViewModel.cs" />
+    <Compile Include="ViewModel\StartWindowViewModel.cs" />
     <Compile Include="View\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Page Include="View\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
+    <Compile Include="View\StartWindow.xaml.cs">
+      <DependentUpon>StartWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Infrastructure\Command.cs" />
     <Compile Include="Infrastructure\NinjectKernel.cs" />
     <Compile Include="Infrastructure\ObservableObject.cs" />
     <Compile Include="Infrastructure\ServiceInjection.cs" />
+    <Page Include="View\StartWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

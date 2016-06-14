@@ -15,14 +15,9 @@ namespace OperationLog.BusinessLogic.Services
         }
 
         public List<T> GetAllWhere<T>(Func<T, bool> predicate) where T : class
-        {
-            return Database.GetRepository<T>().GetAllWhere(predicate).ToList();
-        }
+            => Database.GetRepository<T>().GetAllWhere(predicate).ToList();
 
-        public T Get<T>(Guid id) where T : class
-        {
-            return Database.GetRepository<T>().Get(id);
-        }
+        public T Get<T>(Guid id) where T : class => Database.GetRepository<T>().Get(id);
 
         public void Create<T>(T item) where T : class
         {
@@ -42,14 +37,8 @@ namespace OperationLog.BusinessLogic.Services
             Database.SaveChanges();
         }
 
-        public List<T> GetAll<T>() where T : class
-        {
-            return Database.GetRepository<T>().GetAll().ToList();
-        }
+        public List<T> GetAll<T>() where T : class => Database.GetRepository<T>().GetAll().ToList();
 
-        public void Dispose()
-        {
-            Database.Dispose();
-        }
+        public void Dispose() => Database.Dispose();
     }
 }

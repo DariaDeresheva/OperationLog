@@ -42,15 +42,11 @@ namespace OperationLog.Presentation.Desktop.Model
         }
 
         private static Action<bool> CommonSelectAllHandler<T>(IEnumerable<Selectable<T>> gridCollection)
-        {
-            return value => gridCollection.ForEach(element => element.IsSelected = value);
-        }
+            => value => gridCollection.ForEach(element => element.IsSelected = value);
 
         private static ICommand CommonSearchHandler<T>(ICollection<Selectable<T>> gridCollection,
             IEnumerable<Selectable<T>> searchCollection, 
-            Func<T, string> searchProperty)
-        {
-            return new Command(searchQuery =>
+            Func<T, string> searchProperty) => new Command(searchQuery =>
             {
                 var found =
                     searchCollection.Where(
@@ -60,17 +56,13 @@ namespace OperationLog.Presentation.Desktop.Model
                 gridCollection.Clear();
                 found.ForEach(gridCollection.Add);
             });
-        }
 
         public static GridOption Create<T>(ICollection<Selectable<T>> gridCollection,
             IEnumerable<Selectable<T>> searchCollection,
-            Func<T, string> searchProperty)
-        {
-            return new GridOption
+            Func<T, string> searchProperty) => new GridOption
             {
                 SelectAllHandler = CommonSelectAllHandler(gridCollection),
                 SearchHandler = CommonSearchHandler(gridCollection, searchCollection, searchProperty)
             };
-        }
     }
 }
