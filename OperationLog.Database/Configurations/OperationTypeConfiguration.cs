@@ -14,7 +14,6 @@ namespace OperationLog.Database.Configurations
             Property(operationType => operationType.TypeName)
                 .HasColumnType("char")
                 .HasMaxLength(30)
-                .IsFixedLength()
                 .IsUnicode(false);
         }
     }

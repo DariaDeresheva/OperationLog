@@ -8,11 +8,11 @@ namespace OperationLog.Database.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
             ContextKey = "OperationLog.Database.DatabaseContext.OperationDatabaseContext";
         }
 
-        protected override void Seed(DatabaseContext.OperationDatabaseContext context)
+        protected override void Seed(OperationDatabaseContext context)
         {
         }
     }

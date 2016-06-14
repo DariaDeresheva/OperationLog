@@ -14,13 +14,11 @@ namespace OperationLog.Database.Configurations
             Property(program => program.ProgramId)
                 .HasColumnType("char")
                 .HasMaxLength(1)
-                .IsFixedLength()
                 .IsUnicode(false);
 
             Property(program => program.ProgramName)
                 .HasColumnType("char")
                 .HasMaxLength(30)
-                .IsFixedLength()
                 .IsUnicode(false);
         }
     }

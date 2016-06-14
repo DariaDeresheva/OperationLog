@@ -10,13 +10,11 @@ namespace OperationLog.Database.Configurations
             Property(operation => operation.TableName)
                 .HasColumnType("char")
                 .HasMaxLength(21)
-                .IsFixedLength()
                 .IsUnicode(false);
 
             Property(operation => operation.StationAddress)
                 .HasColumnType("char")
                 .HasMaxLength(6)
-                .IsFixedLength()
                 .IsUnicode(false);
         }
     }
