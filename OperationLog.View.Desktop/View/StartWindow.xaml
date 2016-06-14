@@ -58,14 +58,14 @@
 
                     <GroupBox Header="Временной промежуток" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal">
-                            <Label Style="{DynamicResource DescriptionHeaderStyle}">С:</Label>
+                            <Label>С:</Label>
                             <ma:DateTimePicker DockPanel.Dock="Top" 
                                        SelectedDate="{Binding DateFrom, Mode=TwoWay}"
                                        SelectedTime="{Binding TimeFrom, Mode=TwoWay}"
                                        HandVisibility="All"
                                        PickerVisibility="All"></ma:DateTimePicker>
 
-                            <Label Style="{DynamicResource DescriptionHeaderStyle}">ПО:</Label>
+                            <Label>ПО:</Label>
                             <ma:DateTimePicker DockPanel.Dock="Top" 
                                        SelectedDate="{Binding DateTo, Mode=TwoWay}"
                                        SelectedTime="{Binding TimeTo, Mode=TwoWay}"
