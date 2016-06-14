@@ -180,6 +180,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                 gridOption.Value.AllSelected = true;
             }
             TextSearchQuery = string.Empty;
+            ApplyFilter.Execute(null);
         });
 
         public StartWindowViewModel()

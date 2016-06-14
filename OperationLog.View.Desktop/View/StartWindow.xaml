@@ -233,7 +233,7 @@
                                 FontSize="13" 
                                 FontWeight="Bold" 
                                 ma:ControlsHelper.ContentCharacterCasing="Upper"
-                                Margin="5 0">По умолчанию</Button>
+                                Margin="5 0">Сбросить фильтры</Button>
                     </StackPanel>
                 </Grid>
             </ma:Flyout>
