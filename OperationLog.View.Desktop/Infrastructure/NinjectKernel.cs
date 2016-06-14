@@ -1,4 +1,5 @@
-﻿using Ninject;
+﻿using System.Configuration;
+using Ninject;
 using Ninject.Modules;
 using OperationLog.BusinessLogic.Infrastructure;
 
@@ -15,13 +16,17 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
 
         private static IKernel CreateApplicationKernel()
         {
-            var modules = new INinjectModule[]
+            return new StandardKernel(GetModules());
+        }
+
+        private static INinjectModule[] GetModules()
+        {
+            return new INinjectModule[]
             {
-                new DatabaseInjection("OperationsDatabase"),
+                new DatabaseInjection(ConfigurationManager.ConnectionStrings["OperationDatabase"].ConnectionString),
                 new ServiceInjection(),
                 new TextSearchRuleInjection()
             };
-            return new StandardKernel(modules);
         }
     }
 }

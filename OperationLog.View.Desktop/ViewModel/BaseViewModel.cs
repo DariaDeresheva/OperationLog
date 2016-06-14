@@ -82,7 +82,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
-        public DateTime DateFrom { get; set; } = DateTime.Now.AddDays(-7);
+        public DateTime DateFrom { get; set; } = DateTime.Now.AddMonths(-1);
         public DateTime DateTo { get; set; } = DateTime.Now;
 
         public TimeSpan TimeFrom { get; set; } = DateTime.Now.TimeOfDay;
