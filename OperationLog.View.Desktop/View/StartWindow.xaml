@@ -5,7 +5,6 @@
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:lc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
                 xmlns:ma="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-                xmlns:vm="clr-namespace:OperationLog.Presentation.Desktop.ViewModel"
                 mc:Ignorable="d"
                 ResizeMode="CanResizeWithGrip"
                 WindowStartupLocation="CenterScreen"
@@ -14,9 +13,9 @@
                 Icon="../Resources/Journal.ico"
                 ShowIconOnTitleBar="True"
                 MinHeight="500" 
-                MinWidth="900" 
-                d:DataContext="{d:DesignInstance vm:StartWindowViewModel}">
-
+                MinWidth="900"
+                Loaded="OnLoaded"
+                d:DataContext="{d:DesignData vm:StartWindowViewModel}">
     <ma:MetroWindow.Resources>
         <Style BasedOn="{StaticResource MetroLabel}" TargetType="{x:Type Label}">
             <Setter Property="Foreground" Value="White" />

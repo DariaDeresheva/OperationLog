@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using OperationLog.Presentation.Desktop.ViewModel;
 
 namespace OperationLog.Presentation.Desktop.View
@@ -17,6 +18,11 @@ namespace OperationLog.Presentation.Desktop.View
         {
             _startWindowViewModel.Dispose();
             base.OnClosed(e);
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            _startWindowViewModel.PrepareApplicationData.Execute(null);
         }
     }
 }

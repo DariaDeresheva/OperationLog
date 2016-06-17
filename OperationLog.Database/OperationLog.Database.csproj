@@ -57,6 +57,7 @@
     <Compile Include="Configurations\UserConfiguration.cs" />
     <Compile Include="Configurations\UserTypeConfiguration.cs" />
     <Compile Include="DatabaseContext\OperationDatabaseContext.cs" />
+    <Compile Include="Exceptions\InvalidDatabaseConnectionException.cs" />
     <Compile Include="Migrations\201606061440328_InitialCreate.cs" />
     <Compile Include="Migrations\201606061440328_InitialCreate.Designer.cs">
       <DependentUpon>201606061440328_InitialCreate.cs</DependentUpon>
@@ -64,6 +65,18 @@
     <Compile Include="Migrations\201606080827534_Drop.NetworkName.TableDescription.cs" />
     <Compile Include="Migrations\201606080827534_Drop.NetworkName.TableDescription.Designer.cs">
       <DependentUpon>201606080827534_Drop.NetworkName.TableDescription.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201606171056542_CharToVarchar.cs" />
+    <Compile Include="Migrations\201606171056542_CharToVarchar.Designer.cs">
+      <DependentUpon>201606171056542_CharToVarchar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201606171102395_VarcharToDefaultString.cs" />
+    <Compile Include="Migrations\201606171102395_VarcharToDefaultString.Designer.cs">
+      <DependentUpon>201606171102395_VarcharToDefaultString.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201606171113109_CombineCharAndVarchar.cs" />
+    <Compile Include="Migrations\201606171113109_CombineCharAndVarchar.Designer.cs">
+      <DependentUpon>201606171113109_CombineCharAndVarchar.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -88,6 +101,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201606080827534_Drop.NetworkName.TableDescription.resx">
       <DependentUpon>201606080827534_Drop.NetworkName.TableDescription.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201606171056542_CharToVarchar.resx">
+      <DependentUpon>201606171056542_CharToVarchar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201606171102395_VarcharToDefaultString.resx">
+      <DependentUpon>201606171102395_VarcharToDefaultString.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201606171113109_CombineCharAndVarchar.resx">
+      <DependentUpon>201606171113109_CombineCharAndVarchar.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

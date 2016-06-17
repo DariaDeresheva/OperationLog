@@ -13,13 +13,11 @@ namespace OperationLog.Database.Configurations
 
             Property(program => program.ProgramId)
                 .HasColumnType("char")
-                .HasMaxLength(1)
-                .IsUnicode(false);
+                .HasMaxLength(1);
 
             Property(program => program.ProgramName)
-                .HasColumnType("char")
-                .HasMaxLength(30)
-                .IsUnicode(false);
+                .HasColumnType("varchar")
+                .HasMaxLength(30);
         }
     }
 }

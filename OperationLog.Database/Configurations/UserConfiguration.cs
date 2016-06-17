@@ -12,9 +12,8 @@ namespace OperationLog.Database.Configurations
                 .WillCascadeOnDelete(false);
 
             Property(user => user.UserName)
-                .HasColumnType("char")
-                .HasMaxLength(36)
-                .IsUnicode(false);
+                .HasColumnType("varchar")
+                .HasMaxLength(36);
         }
     }
 }

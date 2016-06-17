@@ -85,23 +85,24 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Helpers\DatabaseValuesConverter.cs" />
     <Compile Include="Infrastructure\TextSearchRuleInjection.cs" />
-    <Compile Include="Model\ITextSearchRule.cs" />
+    <Compile Include="TextSearchRule\ITextSearchRule.cs" />
     <Compile Include="Model\DTO\OperationWithIndex.cs" />
     <Compile Include="Model\Selectable.cs" />
     <Compile Include="Model\GridOption.cs" />
-    <Compile Include="Model\TextSearchStartsWith.cs" />
+    <Compile Include="TextSearchRule\TextSearchStartsWith.cs" />
     <Compile Include="ViewModel\StartWindowViewModel.cs" />
     <Compile Include="View\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\StartWindow.xaml.cs">
-      <DependentUpon>StartWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Infrastructure\Command.cs" />
     <Compile Include="Infrastructure\NinjectKernel.cs" />
     <Compile Include="Infrastructure\ObservableObject.cs" />
     <Compile Include="Infrastructure\ServiceInjection.cs" />
+    <Compile Include="View\StartWindow.xaml.cs">
+      <DependentUpon>StartWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="View\StartWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

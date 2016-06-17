@@ -8,14 +8,12 @@ namespace OperationLog.Database.Configurations
         public OperationConfiguration()
         {
             Property(operation => operation.TableName)
-                .HasColumnType("char")
-                .HasMaxLength(21)
-                .IsUnicode(false);
+                .HasColumnType("varchar")
+                .HasMaxLength(21);
 
             Property(operation => operation.StationAddress)
                 .HasColumnType("char")
-                .HasMaxLength(6)
-                .IsUnicode(false);
+                .HasMaxLength(6);
         }
     }
 }

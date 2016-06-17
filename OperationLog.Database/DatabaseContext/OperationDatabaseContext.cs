@@ -20,14 +20,6 @@ namespace OperationLog.Database.DatabaseContext
                 new MigrateDatabaseToLatestVersion<OperationDatabaseContext, Configuration>());
         }
 
-        public OperationDatabaseContext()
-        {
-        }
-
-        public OperationDatabaseContext(string connectionString) : base(connectionString)
-        {
-        }
-
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Configurations.AddFromAssembly(Assembly.GetExecutingAssembly());

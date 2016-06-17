@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using OperationLog.Database.DatabaseContext;
 using OperationLog.Database.Repositories;
 
@@ -10,9 +11,9 @@ namespace OperationLog.Database.UnitOfWork
 
         private bool _disposed;
 
-        public OperationDatabase(string connectionString)
+        public OperationDatabase()
         {
-            _database = new OperationDatabaseContext(connectionString);
+            _database = new OperationDatabaseContext();
         }
 
         public IRepository<T> GetRepository<T>() where T : class => new CommonRepository<T>(_database);

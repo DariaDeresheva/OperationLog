@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -13,7 +13,6 @@ using LiveCharts.Helpers;
 using LiveCharts.Wpf;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
-using Ninject;
 using OperationLog.BusinessLogic.Services;
 using OperationLog.Presentation.Desktop.Infrastructure;
 using OperationLog.Presentation.Desktop.Model;
@@ -24,7 +23,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
 {
     public class StartWindowViewModel : ObservableObject, IDisposable
     {
-        private readonly IService _service = NinjectKernel.Kernel.Get<IService>();
+        private readonly IService _service = NinjectKernel.Get<IService>();
 
         private List<Operation> _latestSelectedOperations = new List<Operation>();
 
@@ -83,7 +82,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
         private ICommand InitializeChart => new Command(async _ =>
         {
             SeriesCollection = GetSeriesCollection();
-            await OnSeriesResultAsync();
+            await OnSeriesResultAsync(WaitChartUpdateAsync);
         });
 
         private string _textSearchQuery = string.Empty;
@@ -121,7 +120,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
         public ObservableCollection<Selectable<Department>> DepartmentsGrid { get; set; } =
             new ObservableCollection<Selectable<Department>>();
 
-        public IDictionary<string, GridOption> GridOptions { get; }
+        public IDictionary<string, GridOption> GridOptions { get; set; }
 
         public KeyValuePair<string, GridOption> GridOptionSelected
         {
@@ -159,13 +158,29 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                                 .Any(operation => Math.Abs(operation.Index - value) < double.Epsilon))
                         ?.Values.Cast<OperationWithIndex>()
                         .First()
-                        .Operation.User.UserName.Trim() ?? string.Empty;
+                        .Operation.User.UserName ?? string.Empty;
 
         public ICommand ApplyFilter => new Command(async _ =>
         {
             SeriesCollection = GetSeriesCollection();
-            await WaitChartUpdateAsync();
-            await OnSeriesResultAsync(NothingFoundAsync);
+            await OnSeriesResultAsync(WaitChartUpdateAsync, NothingFoundAsync);
+        });
+
+        public ICommand PrepareApplicationData => new Command(async _ =>
+        {
+            if (await PullDatabaseAsync())
+            {
+                PrepareEventHandlers();
+                PrepareDateTimeLimits();
+                PrepareGridOptions();
+                InitializeChart.Execute(null);
+            }
+            else
+            {
+                await MessageDialog("Ошибка подключения к базе данных!",
+                    "Проверьте строку подключения в конфигурационном файле.");
+                Application.Current.Shutdown();
+            }
         });
 
         public ICommand ResetFilter => new Command(_ =>
@@ -183,34 +198,11 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             ApplyFilter.Execute(null);
         });
 
-        public StartWindowViewModel()
+        private void PrepareGridOptions()
         {
-            PrepareEventHandlers();
-            PrepareDateTimeLimits();
-            PrepareCollectionsFromDatabase();
             GridOptions = GetGridOptions();
             GridOptionSelected = GridOptions.FirstOrDefault();
-            InitializeChart.Execute(null);
-        }
-
-        private async Task OnSeriesResultAsync(Func<Task> onEmptyCollection = null)
-        {
-            if (_latestSelectedOperations.Any())
-            {
-                DateTimeFromAxesLimit = _latestSelectedOperations.Min(value => value.DateTime);
-                DateTimeToAxesLimit = _latestSelectedOperations.Max(value => value.DateTime);
-            }
-            else
-            {
-                DateTimeFromAxesLimit = DateTimeFromQuery;
-                DateTimeToAxesLimit = DateTimeToQuery;
-                if (onEmptyCollection != null)
-                {
-                    await onEmptyCollection();
-                }
-            }
-            OnPropertyChanged(nameof(DateTimeFromAxesLimit));
-            OnPropertyChanged(nameof(DateTimeToAxesLimit));
+            OnPropertyChanged(nameof(GridOptions));
         }
 
         private void PrepareDateTimeLimits()
@@ -228,30 +220,50 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     .Select(type => new Selectable<UserType>(type))
                     .OrderBy(type => type.Instanse.TypeName)
                     .ToList();
-
             _programs =
                 _service.GetAll<Program>()
                     .Select(program => new Selectable<Program>(program))
                     .OrderBy(program => program.Instanse.ProgramName)
                     .ToList();
-
             _users =
                 _service.GetAll<User>()
                     .Select(user => new Selectable<User>(user))
                     .OrderBy(user => user.Instanse.UserName)
                     .ToList();
-
-            _operationTypes =
-                _service.GetAll<OperationType>()
-                    .Select(type => new Selectable<OperationType>(type))
-                    .OrderBy(type => type.Instanse.TypeName)
-                    .ToList();
-
             _departments =
                 _service.GetAll<Department>()
                     .Select(department => new Selectable<Department>(department))
                     .OrderBy(department => department.Instanse.DepartmentName)
                     .ToList();
+            _operationTypes =
+                _service.GetAll<OperationType>()
+                    .Select(type => new Selectable<OperationType>(type))
+                    .OrderBy(type => type.Instanse.TypeName)
+                    .ToList();
+        }
+
+        private async Task OnSeriesResultAsync(Func<Task> onNotEmptySeries = null, Func<Task> onEmptySeries = null)
+        {
+            if (_latestSelectedOperations.Any())
+            {
+                DateTimeFromAxesLimit = _latestSelectedOperations.Min(value => value.DateTime);
+                DateTimeToAxesLimit = _latestSelectedOperations.Max(value => value.DateTime);
+                if (onNotEmptySeries != null)
+                {
+                    await onNotEmptySeries();
+                }
+            }
+            else
+            {
+                DateTimeFromAxesLimit = DateTimeFromQuery;
+                DateTimeToAxesLimit = DateTimeToQuery;
+                if (onEmptySeries != null)
+                {
+                    await onEmptySeries();
+                }
+            }
+            OnPropertyChanged(nameof(DateTimeFromAxesLimit));
+            OnPropertyChanged(nameof(DateTimeToAxesLimit));
         }
 
         private IEnumerable<Operation> SelectOperations() => _latestSelectedOperations = _service.GetAllWhere<Operation>(
@@ -264,23 +276,48 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                 ProgramSelected(operation) &&
                 UserSelected(operation));
 
-        private static async Task WaitSeriesRefreshAsync() => await Task.Run(() => Thread.Sleep(500));
+        private static Task<ProgressDialogController> ProgressDialog(string title, string message)
+        {
+            return (Application.Current.MainWindow as MetroWindow).ShowProgressAsync(title, message);
+        }
+
+        private static Task<MessageDialogResult> MessageDialog(string title, string message)
+        {
+            return (Application.Current.MainWindow as MetroWindow).ShowMessageAsync(title, message);
+        }
+
+        private static async Task WaitSeriesRefreshAsync() => await Task.Delay(500);
 
         private static async Task WaitChartUpdateAsync()
         {
-            var progressAlert =
-                await
-                    (Application.Current.MainWindow as MetroWindow)
-                        .ShowProgressAsync("Пожалуйста подождите...", "Применение фильтров...");
-
+            var progressAlert = await ProgressDialog("Применение фильтров к графику...", "Пожалуйста подождите...");
             progressAlert.SetIndeterminate();
             await WaitSeriesRefreshAsync();
             await progressAlert.CloseAsync();
         }
 
-        private static async Task NothingFoundAsync() => await
-            (Application.Current.MainWindow as MetroWindow)
-                .ShowMessageAsync("По вашему запросу ничего не найдено!", "Попробуйте изменить параметры поиска.");
+        private async Task<bool> PullDatabaseAsync()
+        {
+            var progressAlert = await ProgressDialog("Подключение к базе данных...", "Пожалуйста подождите...");
+            progressAlert.SetIndeterminate();
+            Exception catched = null;
+            await Task.Run(() =>
+            {
+                try
+                {
+                    PrepareCollectionsFromDatabase();
+                }
+                catch (SqlException exception)
+                {
+                    catched = exception;
+                }
+            });
+            await progressAlert.CloseAsync();
+            return catched == null;
+        }
+
+        private static async Task NothingFoundAsync()
+            => await MessageDialog("По вашему запросу ничего не найдено!", "Попробуйте изменить параметры поиска.");
 
         private SeriesCollection NewSeriesCollection() => new SeriesCollection(_cartesianMapper);
 

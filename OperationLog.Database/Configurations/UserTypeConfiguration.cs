@@ -13,13 +13,11 @@ namespace OperationLog.Database.Configurations
 
             Property(userType => userType.UserTypeId)
                 .HasColumnType("char")
-                .HasMaxLength(1)
-                .IsUnicode(false);
+                .HasMaxLength(1);
 
             Property(userType => userType.TypeName)
-                .HasColumnType("char")
-                .HasMaxLength(30)
-                .IsUnicode(false);
+                .HasColumnType("varchar")
+                .HasMaxLength(30);
         }
     }
 }
