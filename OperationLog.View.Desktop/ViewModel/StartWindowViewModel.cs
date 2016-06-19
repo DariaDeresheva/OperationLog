@@ -143,7 +143,12 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
-        public double YAxisMax => SeriesCollection.Count;
+        public double YAxisMax
+            =>
+                SeriesCollection.Select(serie => serie.Values.Cast<OperationWithIndex>().First().Operation.User.UserName)
+                    .Distinct()
+                    .Count();
+
         public double YAxisMin { get; } = -1;
 
         public Func<double, string> DateTimeFormatter
@@ -338,24 +343,38 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     operationGroup =>
                         operationGroup.Group.Select(
                             operation => new OperationWithIndex {Index = operationGroup.Index, Operation = operation})
-                            .AsChartValues());
+                            .AsChartValues())
+                            .ToList();
 
             var chartSeries =
-                collectionOfChartValues.Select(values => NewLineSeries(values, values.First().Operation.User.UserName));
+                collectionOfChartValues.Select(values => NewLineSeries(values, values.First().Operation.User.UserName, 20, Brushes.DeepSkyBlue));
+
+            var beginChartSeries =
+                collectionOfChartValues.SelectMany(
+                    values => values.Where(value => value.Operation.OperationType.OperationTypeId == 1002))
+                    .Select(value => new[] {value})
+                    .Select(values => NewLineSeries(values.AsChartValues(), values.Single().Operation.User.UserName, 26, Brushes.Green));
+
+            var endChartSeries =
+                collectionOfChartValues.SelectMany(
+                    values => values.Where(value => value.Operation.OperationType.OperationTypeId == 1003))
+                    .Select(value => new[] {value})
+                    .Select(values => NewLineSeries(values.AsChartValues(), values.Single().Operation.User.UserName, 14, Brushes.Red));
 
             var seriesCollection = NewSeriesCollection();
-            seriesCollection.AddRange(chartSeries);
+            seriesCollection.AddRange(beginChartSeries.Concat(chartSeries).Concat(endChartSeries));
             return seriesCollection;
         }
 
-        private static LineSeries NewLineSeries(IChartValues values, string title) => new LineSeries
+        private static LineSeries NewLineSeries(IChartValues values, string title, double pointDiameter, Brush stroke) => new LineSeries
         {
             Values = values,
-            PointDiameter = 20,
-            StrokeThickness = 3,
+            PointDiameter = pointDiameter,
+            StrokeThickness = 2,
             Fill = Brushes.Transparent,
             LabelPoint = point => ((OperationWithIndex) point.Instance).Operation.OperationType.TypeName,
-            Title = title
+            Title = title,
+            Stroke = stroke
         };
 
         private IDictionary<string, GridOption> GetGridOptions() => new Dictionary<string, GridOption>
