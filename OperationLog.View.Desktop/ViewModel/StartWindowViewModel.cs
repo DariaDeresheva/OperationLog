@@ -33,7 +33,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
         private List<Selectable<Program>> _programs;
         private List<Selectable<Department>> _departments;
 
-        private readonly DateTime _initialDateFrom = DateTime.Now.AddDays(-14);
+        private readonly DateTime _initialDateFrom = DateTime.Now.AddDays(-17);
         private readonly DateTime _initialDateTo = DateTime.Now;
 
         private Func<Operation, bool> OperationTypeSelected
@@ -216,6 +216,10 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             DateTo = DateTimeToAxesLimit = _initialDateTo;
             TimeFrom = DateFrom.TimeOfDay;
             TimeTo = DateTo.TimeOfDay;
+            OnPropertyChanged(nameof(DateFrom));
+            OnPropertyChanged(nameof(DateTo));
+            OnPropertyChanged(nameof(TimeFrom));
+            OnPropertyChanged(nameof(TimeTo));
         }
 
         private void PrepareCollectionsFromDatabase()
@@ -291,11 +295,11 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             return (Application.Current.MainWindow as MetroWindow).ShowMessageAsync(title, message);
         }
 
-        private static async Task WaitSeriesRefreshAsync() => await Task.Delay(500);
+        private static async Task WaitSeriesRefreshAsync() => await Task.Delay(1000);
 
         private static async Task WaitChartUpdateAsync()
         {
-            var progressAlert = await ProgressDialog("Применение фильтров к графику...", "Пожалуйста подождите...");
+            var progressAlert = await ProgressDialog("Применение фильтров...", "Пожалуйста подождите...");
             progressAlert.SetIndeterminate();
             await WaitSeriesRefreshAsync();
             await progressAlert.CloseAsync();
@@ -328,6 +332,35 @@ namespace OperationLog.Presentation.Desktop.ViewModel
 
         private SeriesCollection GetSeriesCollection()
         {
+            var seriesValues = GetSeriesChartValues().ToList();
+
+            var chartSeries =
+                seriesValues.Select(
+                    values => NewLineSeries(values, values.First().Operation.User.UserName, 20, Brushes.DeepSkyBlue));
+
+            var beginChartSeries =
+                seriesValues.SelectMany(
+                    values => values.Where(value => value.Operation.OperationType.OperationTypeId == 1002))
+                    .Select(
+                        value =>
+                            NewLineSeries(new[] {value}.AsChartValues(), value.Operation.User.UserName, 30,
+                                Brushes.Green));
+
+            var endChartSeries =
+                seriesValues.SelectMany(
+                    values => values.Where(value => value.Operation.OperationType.OperationTypeId == 1003))
+                    .Select(
+                        value =>
+                            NewLineSeries(new[] {value}.AsChartValues(), value.Operation.User.UserName, 10,
+                                Brushes.Red));
+
+            var seriesCollection = NewSeriesCollection();
+            seriesCollection.AddRange(beginChartSeries.Concat(chartSeries).Concat(endChartSeries));
+            return seriesCollection;
+        }
+
+        private IEnumerable<ChartValues<OperationWithIndex>> GetSeriesChartValues()
+        {
             var operationsFiltered = SelectOperations();
 
             var operationsOrdered = operationsFiltered
@@ -336,34 +369,29 @@ namespace OperationLog.Presentation.Desktop.ViewModel
 
             var operationsByUser = operationsOrdered
                 .GroupBy(operation => operation.User.UserId)
-                .Select((group, index) => new {Group = group, Index = index});
+                .Select((group, index) => new {Group = @group, Index = index})
+                .ToList();
 
-            var collectionOfChartValues =
-                operationsByUser.Select(
-                    operationGroup =>
-                        operationGroup.Group.Select(
-                            operation => new OperationWithIndex {Index = operationGroup.Index, Operation = operation})
-                            .AsChartValues())
+            foreach (var user in operationsByUser)
+            {
+                var remainOperations = user.Group.ToList();
+                while (remainOperations.Any())
+                {
+                    var enterExitGroup =
+                        remainOperations.TakeWhile(operation => operation.OperationType.OperationTypeId != 1001)
                             .ToList();
-
-            var chartSeries =
-                collectionOfChartValues.Select(values => NewLineSeries(values, values.First().Operation.User.UserName, 20, Brushes.DeepSkyBlue));
-
-            var beginChartSeries =
-                collectionOfChartValues.SelectMany(
-                    values => values.Where(value => value.Operation.OperationType.OperationTypeId == 1002))
-                    .Select(value => new[] {value})
-                    .Select(values => NewLineSeries(values.AsChartValues(), values.Single().Operation.User.UserName, 26, Brushes.Green));
-
-            var endChartSeries =
-                collectionOfChartValues.SelectMany(
-                    values => values.Where(value => value.Operation.OperationType.OperationTypeId == 1003))
-                    .Select(value => new[] {value})
-                    .Select(values => NewLineSeries(values.AsChartValues(), values.Single().Operation.User.UserName, 14, Brushes.Red));
-
-            var seriesCollection = NewSeriesCollection();
-            seriesCollection.AddRange(beginChartSeries.Concat(chartSeries).Concat(endChartSeries));
-            return seriesCollection;
+                    var exitOperation =
+                        remainOperations.FirstOrDefault(operation => operation.OperationType.OperationTypeId == 1001);
+                    if (exitOperation != null)
+                    {
+                        enterExitGroup.Add(exitOperation);
+                    }
+                    yield return enterExitGroup
+                        .Select(operation => new OperationWithIndex {Index = user.Index, Operation = operation})
+                        .AsChartValues();
+                    remainOperations = remainOperations.Except(enterExitGroup).ToList();
+                }
+            }
         }
 
         private static LineSeries NewLineSeries(IChartValues values, string title, double pointDiameter, Brush stroke) => new LineSeries

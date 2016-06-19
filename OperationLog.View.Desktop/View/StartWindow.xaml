@@ -10,7 +10,6 @@
                 WindowStartupLocation="CenterScreen"
                 TitleCharacterCasing="Normal"
                 Title="Визуализатор операционного журнала" 
-                Icon="../Resources/Journal.ico"
                 ShowIconOnTitleBar="True"
                 MinHeight="500" 
                 MinWidth="900"
@@ -241,7 +240,7 @@
 
     <ma:MetroContentControl>
         <Grid>
-            <lc:CartesianChart Series="{Binding SeriesCollection}" Zoom="X" MaxHeight="500" Margin="10">
+            <lc:CartesianChart Series="{Binding SeriesCollection}" Zoom="X" Margin="10">
                 <lc:CartesianChart.AxisX>
                     <lc:Axis LabelFormatter="{Binding DateTimeFormatter}" 
                              MinValue="{Binding DateTimeFromAxesLimit.Ticks}" 
@@ -251,7 +250,7 @@
                 <lc:CartesianChart.AxisY>
                     <lc:Axis LabelFormatter="{Binding YFormatter}" MaxValue="{Binding YAxisMax}" MinValue="{Binding YAxisMin}">
                         <lc:Axis.Separator>
-                            <lc:Separator Step="1" StrokeThickness="1" StrokeDashArray="3"></lc:Separator>
+                            <lc:Separator Step="1" StrokeThickness="1" StrokeDashArray="2"></lc:Separator>
                         </lc:Axis.Separator>
                     </lc:Axis>
                 </lc:CartesianChart.AxisY>
