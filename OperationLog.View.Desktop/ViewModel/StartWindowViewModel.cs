@@ -14,6 +14,8 @@ using LiveCharts.Wpf;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using OperationLog.BusinessLogic.Services;
+using OperationLog.ExcelProvider.ExcelProvider;
+using OperationLog.Presentation.Desktop.Helpers;
 using OperationLog.Presentation.Desktop.Infrastructure;
 using OperationLog.Presentation.Desktop.Model;
 using OperationLog.Presentation.Desktop.Model.DTO;
@@ -24,6 +26,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
     public class StartWindowViewModel : ObservableObject, IDisposable
     {
         private readonly IService _service = NinjectKernel.Get<IService>();
+        private readonly IExcelProvider _excel = NinjectKernel.Get<IExcelProvider>();
 
         private List<Operation> _latestSelectedOperations = new List<Operation>();
 
@@ -33,7 +36,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
         private List<Selectable<Program>> _programs;
         private List<Selectable<Department>> _departments;
 
-        private readonly DateTime _initialDateFrom = DateTime.Now.AddDays(-17);
+        private readonly DateTime _initialDateFrom = DateTime.Now.AddDays(-18);
         private readonly DateTime _initialDateTo = DateTime.Now;
 
         private Func<Operation, bool> OperationTypeSelected
@@ -107,16 +110,12 @@ namespace OperationLog.Presentation.Desktop.ViewModel
 
         public ObservableCollection<Selectable<User>> UsersGrid { get; set; } =
             new ObservableCollection<Selectable<User>>();
-
         public ObservableCollection<Selectable<UserType>> UserTypesGrid { get; set; } =
             new ObservableCollection<Selectable<UserType>>();
-
         public ObservableCollection<Selectable<OperationType>> OperationTypesGrid { get; set; } =
             new ObservableCollection<Selectable<OperationType>>();
-
         public ObservableCollection<Selectable<Program>> ProgramsGrid { get; set; } =
             new ObservableCollection<Selectable<Program>>();
-
         public ObservableCollection<Selectable<Department>> DepartmentsGrid { get; set; } =
             new ObservableCollection<Selectable<Department>>();
 
@@ -152,7 +151,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
         public double YAxisMin { get; } = -1;
 
         public Func<double, string> DateTimeFormatter
-            => value => new DateTime((long) value).ToString("dd.MM.yyyy HH:mm:ss");
+            => value => new DateTime((long)value).ToString("dd.MM.yyyy HH:mm:ss");
 
         public Func<double, string> YFormatter
             =>
@@ -201,6 +200,11 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
             TextSearchQuery = string.Empty;
             ApplyFilter.Execute(null);
+        });
+
+        public ICommand SaveToExcel => new Command(_ =>
+        {
+            ExportToExcel();
         });
 
         private void PrepareGridOptions()
@@ -343,7 +347,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     values => values.Where(value => value.Operation.OperationType.OperationTypeId == 1002))
                     .Select(
                         value =>
-                            NewLineSeries(new[] {value}.AsChartValues(), value.Operation.User.UserName, 30,
+                            NewLineSeries(new[] { value }.AsChartValues(), value.Operation.User.UserName, 30,
                                 Brushes.Green));
 
             var endChartSeries =
@@ -351,7 +355,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     values => values.Where(value => value.Operation.OperationType.OperationTypeId == 1003))
                     .Select(
                         value =>
-                            NewLineSeries(new[] {value}.AsChartValues(), value.Operation.User.UserName, 10,
+                            NewLineSeries(new[] { value }.AsChartValues(), value.Operation.User.UserName, 10,
                                 Brushes.Red));
 
             var seriesCollection = NewSeriesCollection();
@@ -369,7 +373,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
 
             var operationsByUser = operationsOrdered
                 .GroupBy(operation => operation.User.UserId)
-                .Select((group, index) => new {Group = @group, Index = index})
+                .Select((group, index) => new { Group = @group, Index = index })
                 .ToList();
 
             foreach (var user in operationsByUser)
@@ -387,23 +391,37 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                         enterExitGroup.Add(exitOperation);
                     }
                     yield return enterExitGroup
-                        .Select(operation => new OperationWithIndex {Index = user.Index, Operation = operation})
+                        .Select(operation => new OperationWithIndex { Index = user.Index, Operation = operation })
                         .AsChartValues();
                     remainOperations = remainOperations.Except(enterExitGroup).ToList();
                 }
             }
         }
 
-        private static LineSeries NewLineSeries(IChartValues values, string title, double pointDiameter, Brush stroke) => new LineSeries
-        {
-            Values = values,
-            PointDiameter = pointDiameter,
-            StrokeThickness = 2,
-            Fill = Brushes.Transparent,
-            LabelPoint = point => ((OperationWithIndex) point.Instance).Operation.OperationType.TypeName,
-            Title = title,
-            Stroke = stroke
-        };
+        private static LineSeries NewLineSeries(IChartValues values, string title, double pointDiameter, Brush stroke)
+            => new LineSeries
+            {
+                Values = values,
+                PointDiameter = pointDiameter,
+                StrokeThickness = 2,
+                Fill = Brushes.Transparent,
+                LabelPoint =
+                    point =>
+                        "Операция: " + ((OperationWithIndex) point.Instance).Operation.OperationType.TypeName +
+                        Environment.NewLine +
+                        "Программа: " + ((OperationWithIndex) point.Instance).Operation.Program.ProgramName +
+                        Environment.NewLine +
+                        "IP-адрес: " +
+                        DatabaseValuesConverter.GetIpString(
+                            ((OperationWithIndex) point.Instance).Operation.StationIpAddress) + 
+                        Environment.NewLine +
+                        "MAC-адрес: " +
+                        DatabaseValuesConverter.GetMacString(
+                            ((OperationWithIndex) point.Instance).Operation.StationAddress.Select(c => (byte) c)
+                                .ToArray()),
+                Title = title,
+                Stroke = stroke
+            };
 
         private IDictionary<string, GridOption> GetGridOptions() => new Dictionary<string, GridOption>
         {
@@ -428,6 +446,56 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     break;
             }
         };
+
+        private void ExportToExcel()
+        {
+            var values = _latestSelectedOperations
+                .OrderBy(operation => operation.OperationType.TypeName)
+                .GroupBy(operation => operation.Program.ProgramId)
+                .Select(byProgram => new
+                {
+                    byProgram.First().Program.ProgramName,
+                    Users =
+                        byProgram.GroupBy(operation => operation.User.UserId).Select(byUser => new
+                        {
+                            byUser.First().User.UserName,
+                            OperationTypes = byUser.GroupBy(operation => operation.OperationType.OperationTypeId)
+                                .Select(operations => new
+                                {
+                                    operations.First().OperationType.TypeName,
+                                    Id = operations.Key,
+                                    Count = operations.Count()
+                                })
+                        })
+                })
+                .ToList();
+
+            using (var book = _excel.CreateBook($"Отчет {DateTime.Now.ToString(@"dd.MM.yyyy HH-mm-ss")}.xlsx"))
+            {
+                foreach (var value in values)
+                {
+                    var worksheet = book.CreateWorksheet(value.ProgramName);
+                    worksheet.SetCell(worksheet.GetCell(1, 1),
+                        new[] {"ФИО"}.Concat(value.Users.Select(user => user.UserName)).Concat(new[] {"Итого"}));
+                    var types = _operationTypes.Select(type => type.Instanse).ToList();
+                    var typeNames = types.Select(type => type.TypeName)
+                        .ToArray();
+                    worksheet.SetCell(worksheet.GetCell(1, 2), new[] {typeNames});
+                    foreach (var user in value.Users.Select((man, index) => new {man.OperationTypes, Index = index}))
+                    {
+                        var counts =
+                            types.GroupJoin(user.OperationTypes, a => a.OperationTypeId, b => b.Id,
+                                (a, b) => b.Sum(c => c.Count))
+                                .ToArray();
+                        worksheet.SetCell(worksheet.GetCell(user.Index + 2, 2), new[] {counts});
+                    }
+                    var summary =
+                        types.GroupJoin(value.Users.SelectMany(user => user.OperationTypes), a => a.OperationTypeId,
+                            b => b.Id, (a, b) => b.Sum(c => c.Count)).ToArray();
+                    worksheet.SetCell(worksheet.GetCell(value.Users.Count() + 2, 2), new[] {summary});
+                }
+            }
+        }
 
         public void Dispose()
         {

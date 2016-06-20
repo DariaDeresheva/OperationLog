@@ -18,6 +18,7 @@ namespace OperationLog.Database.DatabaseContext
         {
             System.Data.Entity.Database.SetInitializer(
                 new MigrateDatabaseToLatestVersion<OperationDatabaseContext, Configuration>());
+            var provider = System.Data.Entity.SqlServer.SqlProviderServices.Instance;
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

@@ -1,6 +1,5 @@
 ﻿using Ninject.Modules;
-using OperationLog.Presentation.Desktop.Model;
-using OperationLog.Presentation.Desktop.TextSearchRule;
+using OperationLog.Presentation.Desktop.Infrastructure.TextSearchRule;
 
 namespace OperationLog.Presentation.Desktop.Infrastructure
 {

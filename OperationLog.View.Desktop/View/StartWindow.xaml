@@ -32,15 +32,20 @@
         <ma:WindowCommands>
             <ToggleButton IsChecked="{Binding ElementName=Filters, Path=IsOpen}">
                 <StackPanel Orientation="Horizontal">
-                    <Rectangle Width="18" Height="18"
+                    <Rectangle Width="14" Height="14"
                                Fill="{Binding RelativeSource={RelativeSource AncestorType=ToggleButton}, Path=Foreground}">
                         <Rectangle.OpacityMask>
                             <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_filter}" />
                         </Rectangle.OpacityMask>
                     </Rectangle>
-                    <TextBlock FontSize="15" VerticalAlignment="Center" Margin="3 0 0 0">Фильтрация</TextBlock>
+                    <TextBlock FontSize="13" VerticalAlignment="Center" Margin="3 0 0 0">Фильтрация</TextBlock>
                 </StackPanel>
             </ToggleButton>
+            <Button Command="{Binding SaveToExcel}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontSize="13" VerticalAlignment="Center">Отчет</TextBlock>
+                </StackPanel>
+            </Button>
         </ma:WindowCommands>
     </ma:MetroWindow.RightWindowCommands>
 

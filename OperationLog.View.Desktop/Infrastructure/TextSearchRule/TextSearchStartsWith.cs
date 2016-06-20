@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OperationLog.Presentation.Desktop.TextSearchRule
+namespace OperationLog.Presentation.Desktop.Infrastructure.TextSearchRule
 {
     public class TextSearchStartsWith : ITextSearchRule
     {

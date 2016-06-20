@@ -8,6 +8,7 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
         public static IKernel GetAppKernel() => new StandardKernel(
             new DatabaseInjection(),
             new ServiceInjection(),
+            new ExcelProviderInjection(),
             new TextSearchRuleInjection());
 
         public static T Get<T>()

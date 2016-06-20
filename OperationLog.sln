@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpertaionLog.Database.Objec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationLog.Presentation.Desktop", "OperationLog.View.Desktop\OperationLog.Presentation.Desktop.csproj", "{ADB4AFEF-7880-4A2C-99EE-9019314D6E93}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OperationLog.ExcelProvider", "OperationLog.ExcelProvider\OperationLog.ExcelProvider.csproj", "{8136CAB1-4E35-4B7D-AE94-04E602C79ED0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{ADB4AFEF-7880-4A2C-99EE-9019314D6E93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADB4AFEF-7880-4A2C-99EE-9019314D6E93}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ADB4AFEF-7880-4A2C-99EE-9019314D6E93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8136CAB1-4E35-4B7D-AE94-04E602C79ED0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8136CAB1-4E35-4B7D-AE94-04E602C79ED0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8136CAB1-4E35-4B7D-AE94-04E602C79ED0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8136CAB1-4E35-4B7D-AE94-04E602C79ED0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

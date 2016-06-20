@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using LiveCharts.Helpers;
 using OperationLog.Presentation.Desktop.Infrastructure;
-using OperationLog.Presentation.Desktop.TextSearchRule;
+using OperationLog.Presentation.Desktop.Infrastructure.TextSearchRule;
 
 namespace OperationLog.Presentation.Desktop.Model
 {
