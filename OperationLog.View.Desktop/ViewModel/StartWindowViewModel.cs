@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -202,9 +204,12 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             ApplyFilter.Execute(null);
         });
 
-        public ICommand SaveToExcel => new Command(_ =>
+        public ICommand SaveToExcel => new Command(async _ =>
         {
-            ExportToExcel();
+            var filename = ExportToExcel();
+            await
+                MessageDialog($@"Файл ""{filename}"" успешно сохранен!",
+                    $"Путь: {Path.Combine(Assembly.GetEntryAssembly().Location, filename)}");
         });
 
         private void PrepareGridOptions()
@@ -447,7 +452,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         };
 
-        private void ExportToExcel()
+        private string ExportToExcel()
         {
             var values = _latestSelectedOperations
                 .OrderBy(operation => operation.OperationType.TypeName)
@@ -470,7 +475,8 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                 })
                 .ToList();
 
-            using (var book = _excel.CreateBook($"Отчет {DateTime.Now.ToString(@"dd.MM.yyyy HH-mm-ss")}.xlsx"))
+            var filename = $"Отчет {DateTime.Now.ToString(@"dd.MM.yyyy HH-mm-ss")}.xlsx";
+            using (var book = _excel.CreateBook(filename))
             {
                 foreach (var value in values)
                 {
@@ -495,6 +501,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     worksheet.SetCell(worksheet.GetCell(value.Users.Count() + 2, 2), new[] {summary});
                 }
             }
+            return filename;
         }
 
         public void Dispose()
