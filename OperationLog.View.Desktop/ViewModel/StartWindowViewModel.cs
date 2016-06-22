@@ -208,7 +208,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
         {
             var filename = ExportToExcel();
             await
-                MessageDialog($@"Файл ""{filename}"" успешно сохранен!",
+                MessageDialog($@"Файл ""{filename}"" успешно сохранен2!",
                     $"Путь: {Path.Combine(Assembly.GetEntryAssembly().Location, filename)}");
         });
 
