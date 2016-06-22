@@ -20,7 +20,8 @@ using OperationLog.ExcelProvider.ExcelProvider;
 using OperationLog.Presentation.Desktop.Helpers;
 using OperationLog.Presentation.Desktop.Infrastructure;
 using OperationLog.Presentation.Desktop.Model;
-using OperationLog.Presentation.Desktop.Model.DTO;
+using OperationLog.Presentation.Desktop.Model.Dto;
+using OperationLog.Presentation.Desktop.Model.Dto.ValuesToExcel;
 using OpertaionLog.Database.Objects.Entities;
 
 namespace OperationLog.Presentation.Desktop.ViewModel
@@ -73,6 +74,9 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                         department =>
                             department.Instanse.DepartmentId == operation.Department.DepartmentId &&
                             department.IsSelected);
+
+        private static Func<ChartPoint, string> TooltipLabelPoint
+            => point => TooltipInfo(((OperationWithIndex) point.Instance).Operation);
 
         private KeyValuePair<string, GridOption> _gridOptionSelected;
 
@@ -144,27 +148,23 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
-        public double YAxisMax
-            =>
-                SeriesCollection.Select(serie => serie.Values.Cast<OperationWithIndex>().First().Operation.User.UserName)
-                    .Distinct()
-                    .Count();
+        public double YAxisMax => _latestSelectedOperations.DistinctBy(operation => operation.User.UserId).Count();
 
         public double YAxisMin { get; } = -1;
 
         public Func<double, string> DateTimeFormatter
             => value => new DateTime((long)value).ToString("dd.MM.yyyy HH:mm:ss");
 
-        public Func<double, string> YFormatter
+        public Func<double, string> NameFormatter
             =>
                 value =>
-                    SeriesCollection.FirstOrDefault(
-                        collection =>
-                            collection.Values.Cast<OperationWithIndex>()
-                                .Any(operation => Math.Abs(operation.Index - value) < double.Epsilon))
-                        ?.Values.Cast<OperationWithIndex>()
-                        .First()
-                        .Operation.User.UserName ?? string.Empty;
+                    ((OperationWithIndex)
+                        SeriesCollection.FirstOrDefault(
+                            collection =>
+                                Math.Abs(((OperationWithIndex) collection.Values.Points.First().Instance).Index - value) <
+                                double.Epsilon)
+                            ?.Values.Points.First().Instance)
+                        ?.Operation.User.UserName ?? string.Empty;
 
         public ICommand ApplyFilter => new Command(async _ =>
         {
@@ -208,7 +208,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
         {
             var filename = ExportToExcel();
             await
-                MessageDialog($@"Файл ""{filename}"" успешно сохранен2!",
+                MessageDialog($@"Файл ""{filename}"" успешно сохранен!",
                     $"Путь: {Path.Combine(Assembly.GetEntryAssembly().Location, filename)}");
         });
 
@@ -410,23 +410,22 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                 PointDiameter = pointDiameter,
                 StrokeThickness = 2,
                 Fill = Brushes.Transparent,
-                LabelPoint =
-                    point =>
-                        "Операция: " + ((OperationWithIndex) point.Instance).Operation.OperationType.TypeName +
-                        Environment.NewLine +
-                        "Программа: " + ((OperationWithIndex) point.Instance).Operation.Program.ProgramName +
-                        Environment.NewLine +
-                        "IP-адрес: " +
-                        DatabaseValuesConverter.GetIpString(
-                            ((OperationWithIndex) point.Instance).Operation.StationIpAddress) + 
-                        Environment.NewLine +
-                        "MAC-адрес: " +
-                        DatabaseValuesConverter.GetMacString(
-                            ((OperationWithIndex) point.Instance).Operation.StationAddress.Select(c => (byte) c)
-                                .ToArray()),
+                LabelPoint = TooltipLabelPoint,
                 Title = title,
                 Stroke = stroke
             };
+
+        private static string TooltipInfo(Operation operation)
+        {
+            var info = new[]
+            {
+                $"Операция: {operation.OperationType.TypeName}",
+                $"Программа: {operation.Program.ProgramName}",
+                $"IP-адрес: {DatabaseValuesConverter.GetIpString(operation.StationIpAddress)}",
+                $"MAC-адрес: {DatabaseValuesConverter.GetMacString(operation.StationAddress.Select(symbol => (byte) symbol))}"
+            };
+            return string.Join(Environment.NewLine, info);
+        }
 
         private IDictionary<string, GridOption> GetGridOptions() => new Dictionary<string, GridOption>
         {
@@ -452,56 +451,63 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         };
 
+        private IEnumerable<ValueToExcelWorksheet> ValuesToExcel()
+            =>
+                _latestSelectedOperations.OrderBy(operation => operation.OperationType.TypeName)
+                    .GroupBy(operation => operation.Program.ProgramId)
+                    .Select(byProgram =>
+                        new ValueToExcelWorksheet
+                        {
+                            ProgramName = byProgram.First().Program.ProgramName,
+                            Users =
+                                byProgram.GroupBy(operation => operation.User.UserId)
+                                    .Select(byUser =>
+                                        new ValueToExcelUser
+                                        {
+                                            UserName = byUser.First().User.UserName,
+                                            OperationTypes =
+                                                byUser.GroupBy(operation => operation.OperationType.OperationTypeId)
+                                                    .Select(operations =>
+                                                        new ValueToExcelOperationType
+                                                        {
+                                                            TypeName =
+                                                                operations.First().OperationType.TypeName,
+                                                            Id = operations.Key,
+                                                            Count = operations.Count()
+                                                        })
+                                        })
+                        });
+
         private string ExportToExcel()
         {
-            var values = _latestSelectedOperations
-                .OrderBy(operation => operation.OperationType.TypeName)
-                .GroupBy(operation => operation.Program.ProgramId)
-                .Select(byProgram => new
-                {
-                    byProgram.First().Program.ProgramName,
-                    Users =
-                        byProgram.GroupBy(operation => operation.User.UserId).Select(byUser => new
-                        {
-                            byUser.First().User.UserName,
-                            OperationTypes = byUser.GroupBy(operation => operation.OperationType.OperationTypeId)
-                                .Select(operations => new
-                                {
-                                    operations.First().OperationType.TypeName,
-                                    Id = operations.Key,
-                                    Count = operations.Count()
-                                })
-                        })
-                })
-                .ToList();
-
-            var filename = $"Отчет {DateTime.Now.ToString(@"dd.MM.yyyy HH-mm-ss")}.xlsx";
-            using (var book = _excel.CreateBook(filename))
+            using (var book = _excel.CreateBook($"Отчет {DateTime.Now.ToString(@"dd.MM.yyyy HH-mm-ss")}.xlsx"))
             {
-                foreach (var value in values)
+                var types = _operationTypes.Select(type => type.Instanse).ToList();
+                foreach (var value in ValuesToExcel())
                 {
-                    var worksheet = book.CreateWorksheet(value.ProgramName);
-                    worksheet.SetCell(worksheet.GetCell(1, 1),
-                        new[] {"ФИО"}.Concat(value.Users.Select(user => user.UserName)).Concat(new[] {"Итого"}));
-                    var types = _operationTypes.Select(type => type.Instanse).ToList();
-                    var typeNames = types.Select(type => type.TypeName)
-                        .ToArray();
-                    worksheet.SetCell(worksheet.GetCell(1, 2), new[] {typeNames});
-                    foreach (var user in value.Users.Select((man, index) => new {man.OperationTypes, Index = index}))
-                    {
-                        var counts =
-                            types.GroupJoin(user.OperationTypes, a => a.OperationTypeId, b => b.Id,
-                                (a, b) => b.Sum(c => c.Count))
-                                .ToArray();
-                        worksheet.SetCell(worksheet.GetCell(user.Index + 2, 2), new[] {counts});
-                    }
+                    var header = new[] {"ФИО"}.Concat(types.Select(type => type.TypeName));
+                    var content =
+                        value.Users.Select(man => new {man.UserName, man.OperationTypes})
+                            .Select(user => new[] {user.UserName}
+                                .Concat(types.GroupJoin(user.OperationTypes, a => a.OperationTypeId, b => b.Id,
+                                    (a, b) => b.Sum(c => c.Count)).Cast<object>()));
                     var summary =
-                        types.GroupJoin(value.Users.SelectMany(user => user.OperationTypes), a => a.OperationTypeId,
-                            b => b.Id, (a, b) => b.Sum(c => c.Count)).ToArray();
-                    worksheet.SetCell(worksheet.GetCell(value.Users.Count() + 2, 2), new[] {summary});
+                        new[] {"Итого"}.Concat(
+                            types.GroupJoin(value.Users.SelectMany(user => user.OperationTypes), a => a.OperationTypeId,
+                                b => b.Id, (a, b) => b.Sum(c => c.Count)).Cast<object>());
+
+                    var table = new[] {header}.Concat(content).Concat(new[] {summary}).ToList();
+
+                    var worksheet = book.CreateWorksheet(value.ProgramName);
+                    worksheet.GetCell(1, 1).SetFromArrays(table);
+                    worksheet.AddPieChart(position: worksheet.GetCell(table.Count + 2, 2),
+                        name: "Типы операций",
+                        size: 600,
+                        valuesRange: worksheet.GetRange(table.Count, 2, table.Count, table.First().Count()),
+                        axesRange: worksheet.GetRange(1, 2, 1, table.First().Count()));
                 }
+                return book.FileName;
             }
-            return filename;
         }
 
         public void Dispose()
