@@ -58,6 +58,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml">
@@ -74,27 +75,24 @@
     </ApplicationDefinition>
     <Compile Include="Helpers\DatabaseValuesConverter.cs" />
     <Compile Include="Helpers\LinqExtensions.cs" />
-    <Compile Include="Infrastructure\ExcelProviderInjection.cs" />
-    <Compile Include="Infrastructure\TextSearchRuleInjection.cs" />
-    <Compile Include="Infrastructure\TextSearchRule\ITextSearchRule.cs" />
+    <Compile Include="Infrastructure\Injections\ExcelProviderInjection.cs" />
+    <Compile Include="Infrastructure\Injections\TextSearchRuleInjection.cs" />
+    <Compile Include="Helpers\TextSearchRule\ITextSearchRule.cs" />
     <Compile Include="Model\Dto\OperationWithIndex.cs" />
     <Compile Include="Model\Dto\ValuesToExcel\ValueToExcelOperationType.cs" />
     <Compile Include="Model\Dto\ValuesToExcel\ValueToExcelUser.cs" />
     <Compile Include="Model\Dto\ValuesToExcel\ValueToExcelWorksheet.cs" />
     <Compile Include="Model\Selectable.cs" />
     <Compile Include="Model\GridOption.cs" />
-    <Compile Include="Infrastructure\TextSearchRule\TextSearchStartsWith.cs" />
+    <Compile Include="Helpers\TextSearchRule\TextSearchStartsWith.cs" />
     <Compile Include="ViewModel\StartWindowViewModel.cs" />
     <Compile Include="View\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Infrastructure\Command.cs" />
-    <Compile Include="Infrastructure\NinjectKernel.cs" />
-    <Compile Include="Infrastructure\ObservableObject.cs" />
-    <Compile Include="Infrastructure\ServiceInjection.cs" />
-    <Compile Include="View\StartWindow.xaml.cs">
-      <DependentUpon>StartWindow.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Infrastructure\Mvvm\Command.cs" />
+    <Compile Include="Infrastructure\DependencyResolver.cs" />
+    <Compile Include="Infrastructure\Mvvm\ObservableObject.cs" />
+    <Compile Include="Infrastructure\Injections\ServiceInjection.cs" />
     <Page Include="View\StartWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -1,7 +1,7 @@
 ﻿using Ninject.Modules;
 using OperationLog.BusinessLogic.Services;
 
-namespace OperationLog.Presentation.Desktop.Infrastructure
+namespace OperationLog.Presentation.Desktop.Infrastructure.Injections
 {
     public class ServiceInjection : NinjectModule
     {

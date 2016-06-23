@@ -1,4 +1,4 @@
-﻿using OperationLog.Presentation.Desktop.Infrastructure;
+﻿using OperationLog.Presentation.Desktop.Infrastructure.Mvvm;
 
 namespace OperationLog.Presentation.Desktop.Model
 {

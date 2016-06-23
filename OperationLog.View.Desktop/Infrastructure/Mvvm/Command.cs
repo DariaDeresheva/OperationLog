@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace OperationLog.Presentation.Desktop.Infrastructure
+namespace OperationLog.Presentation.Desktop.Infrastructure.Mvvm
 {
     public class Command : ICommand
     {

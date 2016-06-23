@@ -1,4 +1,4 @@
-﻿namespace OperationLog.Presentation.Desktop.Infrastructure.TextSearchRule
+﻿namespace OperationLog.Presentation.Desktop.Helpers.TextSearchRule
 {
     public interface ITextSearchRule
     {

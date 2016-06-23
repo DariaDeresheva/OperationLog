@@ -39,7 +39,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Infrastructure\DatabaseInjection.cs" />
+    <Compile Include="Infrastructure\Injections\DatabaseInjection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CommonService.cs" />
     <Compile Include="Services\IService.cs" />

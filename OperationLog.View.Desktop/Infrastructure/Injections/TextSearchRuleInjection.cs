@@ -1,7 +1,7 @@
 ﻿using Ninject.Modules;
-using OperationLog.Presentation.Desktop.Infrastructure.TextSearchRule;
+using OperationLog.Presentation.Desktop.Helpers.TextSearchRule;
 
-namespace OperationLog.Presentation.Desktop.Infrastructure
+namespace OperationLog.Presentation.Desktop.Infrastructure.Injections
 {
     public class TextSearchRuleInjection : NinjectModule
     {

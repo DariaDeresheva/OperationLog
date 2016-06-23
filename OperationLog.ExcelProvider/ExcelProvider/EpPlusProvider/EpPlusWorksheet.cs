@@ -14,8 +14,8 @@ namespace OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider
 
         public IExcelCell GetCell(int row, int column) => new EpPlusCell(_worksheet.Cells[row, column]);
 
-        public IExcelRange GetRange(int rowFrom, int columnFrom, int rowTo, int columnTo)
-            => new EpPlusRange(_worksheet.Cells[rowFrom, columnFrom, rowTo, columnTo]);
+        public IExcelRange GetRange(IExcelCell from, IExcelCell to)
+            => new EpPlusRange(_worksheet.Cells[from.Row, from.Column, to.Row, to.Column]);
 
         public void AddPieChart(IExcelCell position,
             string name,
@@ -28,6 +28,11 @@ namespace OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider
             chart.SetSize(size, size);
             chart.Series.Add(valuesRange.GetAddress(), axesRange.GetAddress());
             chart.Title.Text = name;
+            ApplyPieChartStyles(chart);
+        }
+
+        private static void ApplyPieChartStyles(ExcelPieChart chart)
+        {
             chart.DataLabel.ShowPercent = true;
             chart.DataLabel.ShowLeaderLines = true;
             chart.DataLabel.ShowCategory = true;

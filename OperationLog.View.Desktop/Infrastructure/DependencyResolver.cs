@@ -1,9 +1,10 @@
 ﻿using Ninject;
-using OperationLog.BusinessLogic.Infrastructure;
+using OperationLog.BusinessLogic.Infrastructure.Injections;
+using OperationLog.Presentation.Desktop.Infrastructure.Injections;
 
 namespace OperationLog.Presentation.Desktop.Infrastructure
 {
-    public class NinjectKernel
+    public class DependencyResolver
     {
         public static IKernel GetAppKernel() => new StandardKernel(
             new DatabaseInjection(),

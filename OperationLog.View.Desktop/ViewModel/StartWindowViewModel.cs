@@ -19,6 +19,7 @@ using OperationLog.BusinessLogic.Services;
 using OperationLog.ExcelProvider.ExcelProvider;
 using OperationLog.Presentation.Desktop.Helpers;
 using OperationLog.Presentation.Desktop.Infrastructure;
+using OperationLog.Presentation.Desktop.Infrastructure.Mvvm;
 using OperationLog.Presentation.Desktop.Model;
 using OperationLog.Presentation.Desktop.Model.Dto;
 using OperationLog.Presentation.Desktop.Model.Dto.ValuesToExcel;
@@ -28,8 +29,8 @@ namespace OperationLog.Presentation.Desktop.ViewModel
 {
     public class StartWindowViewModel : ObservableObject, IDisposable
     {
-        private readonly IService _service = NinjectKernel.Get<IService>();
-        private readonly IExcelProvider _excel = NinjectKernel.Get<IExcelProvider>();
+        private readonly IService _service = DependencyResolver.Get<IService>();
+        private readonly IExcelProvider _excel = DependencyResolver.Get<IExcelProvider>();
 
         private List<Operation> _latestSelectedOperations = new List<Operation>();
 
@@ -39,7 +40,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
         private List<Selectable<Program>> _programs;
         private List<Selectable<Department>> _departments;
 
-        private readonly DateTime _initialDateFrom = DateTime.Now.AddDays(-18);
+        private readonly DateTime _initialDateFrom = DateTime.Now.AddMonths(-1);
         private readonly DateTime _initialDateTo = DateTime.Now;
 
         private Func<Operation, bool> OperationTypeSelected
@@ -304,7 +305,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             return (Application.Current.MainWindow as MetroWindow).ShowMessageAsync(title, message);
         }
 
-        private static async Task WaitSeriesRefreshAsync() => await Task.Delay(1000);
+        private static async Task WaitSeriesRefreshAsync() => await Task.Delay(TimeSpan.FromSeconds(1));
 
         private static async Task WaitChartUpdateAsync()
         {
@@ -503,8 +504,11 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     worksheet.AddPieChart(position: worksheet.GetCell(table.Count + 2, 2),
                         name: "Типы операций",
                         size: 600,
-                        valuesRange: worksheet.GetRange(table.Count, 2, table.Count, table.First().Count()),
-                        axesRange: worksheet.GetRange(1, 2, 1, table.First().Count()));
+                        valuesRange:
+                            worksheet.GetRange(worksheet.GetCell(table.Count, 2),
+                                worksheet.GetCell(table.Count, table.First().Count())),
+                        axesRange:
+                            worksheet.GetRange(worksheet.GetCell(1, 2), worksheet.GetCell(1, table.First().Count())));
                 }
                 return book.FileName;
             }

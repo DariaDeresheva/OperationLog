@@ -50,7 +50,6 @@
     <Compile Include="Configurations\UserConfiguration.cs" />
     <Compile Include="Configurations\UserTypeConfiguration.cs" />
     <Compile Include="DatabaseContext\OperationDatabaseContext.cs" />
-    <Compile Include="Exceptions\InvalidDatabaseConnectionException.cs" />
     <Compile Include="Migrations\201606061440328_InitialCreate.cs" />
     <Compile Include="Migrations\201606061440328_InitialCreate.Designer.cs">
       <DependentUpon>201606061440328_InitialCreate.cs</DependentUpon>
@@ -76,7 +75,7 @@
     <Compile Include="Repositories\CommonRepository.cs" />
     <Compile Include="Repositories\IRepository.cs" />
     <Compile Include="UnitOfWork\IUnitOfWork.cs" />
-    <Compile Include="UnitOfWork\OperationDatabase.cs" />
+    <Compile Include="UnitOfWork\OperationDatabaseUnitOfWork.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

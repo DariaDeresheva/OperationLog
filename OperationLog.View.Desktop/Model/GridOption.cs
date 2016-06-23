@@ -4,14 +4,15 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using LiveCharts.Helpers;
+using OperationLog.Presentation.Desktop.Helpers.TextSearchRule;
 using OperationLog.Presentation.Desktop.Infrastructure;
-using OperationLog.Presentation.Desktop.Infrastructure.TextSearchRule;
+using OperationLog.Presentation.Desktop.Infrastructure.Mvvm;
 
 namespace OperationLog.Presentation.Desktop.Model
 {
     public class GridOption : ObservableObject
     {
-        private static readonly ITextSearchRule TextSearchRule = NinjectKernel.Get<ITextSearchRule>();
+        private static readonly ITextSearchRule TextSearchRule = DependencyResolver.Get<ITextSearchRule>();
 
         private Visibility _visibility = Visibility.Collapsed;
         private bool _allSelected = true;

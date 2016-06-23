@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace OperationLog.Presentation.Desktop.Infrastructure
+namespace OperationLog.Presentation.Desktop.Infrastructure.Mvvm
 {
     public class ObservableObject : INotifyPropertyChanged
     {

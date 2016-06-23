@@ -6,6 +6,7 @@
                 xmlns:lc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
                 xmlns:ma="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                 xmlns:vm="clr-namespace:OperationLog.Presentation.Desktop.ViewModel"
+                xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                 mc:Ignorable="d"
                 ResizeMode="CanResizeWithGrip"
                 WindowStartupLocation="CenterScreen"
@@ -13,9 +14,15 @@
                 Title="Визуализатор операционного журнала" 
                 ShowIconOnTitleBar="True"
                 MinHeight="500" 
-                MinWidth="900"
-                Loaded="OnLoaded"
-                d:DataContext="{d:DesignInstance vm:StartWindowViewModel}">
+                MinWidth="900">
+    <Window.DataContext>
+        <vm:StartWindowViewModel />
+    </Window.DataContext>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding PrepareApplicationData}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <ma:MetroWindow.Resources>
         <Style BasedOn="{StaticResource MetroLabel}" TargetType="{x:Type Label}">
             <Setter Property="Foreground" Value="White" />
