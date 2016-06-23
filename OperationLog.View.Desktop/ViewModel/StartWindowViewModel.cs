@@ -210,7 +210,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             var filename = ExportToExcel();
             await
                 MessageDialog($@"Файл ""{filename}"" успешно сохранен!",
-                    $"Путь: {Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), filename)}");
+                    $"Путь: {Path.Combine(Path.GetFullPath(filename))}");
         });
 
         private void PrepareGridOptions()
