@@ -13,7 +13,6 @@ namespace OperationLog.Presentation.Desktop.Model
     public class GridOption : ObservableObject
     {
         private static readonly ITextSearchRule TextSearchRule = DependencyResolver.Get<ITextSearchRule>();
-
         private Visibility _visibility = Visibility.Collapsed;
         private bool _allSelected = true;
 

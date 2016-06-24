@@ -174,7 +174,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
 
         public ICommand PrepareApplicationData => new Command(async _ =>
         {
-            if (await PullDatabaseAsync())
+            if (await TryConnectToDatabaseAsync())
             {
                 PrepareEventHandlers();
                 PrepareDateTimeLimits();
@@ -314,7 +314,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             await progressAlert.CloseAsync();
         }
 
-        private async Task<bool> PullDatabaseAsync()
+        private async Task<bool> TryConnectToDatabaseAsync()
         {
             var progressAlert = await ProgressDialog("Подключение к базе данных...", "Пожалуйста подождите...");
             progressAlert.SetIndeterminate();
