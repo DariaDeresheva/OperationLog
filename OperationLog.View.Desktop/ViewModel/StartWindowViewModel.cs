@@ -16,7 +16,6 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using OperationLog.BusinessLogic.Services;
 using OperationLog.ExcelProvider;
-using OperationLog.ExcelProvider.ExcelProvider;
 using OperationLog.Presentation.Desktop.Helpers;
 using OperationLog.Presentation.Desktop.Infrastructure;
 using OperationLog.Presentation.Desktop.Infrastructure.Mvvm;

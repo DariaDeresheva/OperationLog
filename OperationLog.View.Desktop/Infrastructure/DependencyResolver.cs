@@ -6,7 +6,7 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
 {
     public class DependencyResolver
     {
-        public static IKernel GetAppKernel() => new StandardKernel(
+        private static IKernel GetDependencyResolverKernel() => new StandardKernel(
             new UnitOfWorkInjection(),
             new ServiceInjection(),
             new ExcelProviderInjection(),
@@ -14,7 +14,7 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
 
         public static T Get<T>()
         {
-            return GetAppKernel().Get<T>();
+            return GetDependencyResolverKernel().Get<T>();
         }
     }
 }
