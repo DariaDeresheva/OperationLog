@@ -9,9 +9,9 @@ namespace OpertaionLog.Database.Objects.Entities
         public string StationAddress { get; set; }
         public int StationIpAddress { get; set; }
         public string TableName { get; set; }
-        public User User { get; set; }
-        public OperationType OperationType { get; set; }
-        public Program Program { get; set; }
-        public Department Department { get; set; }
+        public virtual User User { get; set; }
+        public virtual OperationType OperationType { get; set; }
+        public virtual Program Program { get; set; }
+        public virtual Department Department { get; set; }
     }
 }

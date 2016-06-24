@@ -6,6 +6,6 @@ namespace OpertaionLog.Database.Objects.Entities
     {
         public string ProgramId { get; set; }
         public string ProgramName { get; set; }
-        public List<Operation> Operations { get; set; }
+        public virtual List<Operation> Operations { get; set; }
     }
 }
