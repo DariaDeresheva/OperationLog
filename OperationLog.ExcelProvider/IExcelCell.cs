@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace OperationLog.ExcelProvider.ExcelProvider
+namespace OperationLog.ExcelProvider
 {
     public interface IExcelCell
     {
         int Row { get; } 
         int Column { get; }
         object Value { get; }
-        void SetFromArrays(IEnumerable<IEnumerable<object>> values);
+        void SetFromTable(IEnumerable<IEnumerable<object>> values);
     }
 }

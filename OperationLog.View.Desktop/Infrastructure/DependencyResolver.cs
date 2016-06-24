@@ -7,7 +7,7 @@ namespace OperationLog.Presentation.Desktop.Infrastructure
     public class DependencyResolver
     {
         public static IKernel GetAppKernel() => new StandardKernel(
-            new DatabaseInjection(),
+            new UnitOfWorkInjection(),
             new ServiceInjection(),
             new ExcelProviderInjection(),
             new TextSearchRuleInjection());

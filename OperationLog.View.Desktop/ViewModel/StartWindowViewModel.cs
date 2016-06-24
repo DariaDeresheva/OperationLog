@@ -15,6 +15,7 @@ using LiveCharts.Wpf;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using OperationLog.BusinessLogic.Services;
+using OperationLog.ExcelProvider;
 using OperationLog.ExcelProvider.ExcelProvider;
 using OperationLog.Presentation.Desktop.Helpers;
 using OperationLog.Presentation.Desktop.Infrastructure;
@@ -499,7 +500,7 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     var table = new[] {header}.Concat(content).Concat(new[] {summary}).ToList();
 
                     var worksheet = book.CreateWorksheet(value.ProgramName);
-                    worksheet.GetCell(1, 1).SetFromArrays(table);
+                    worksheet.GetCell(1, 1).SetFromTable(table);
                     worksheet.AddPieChart(position: worksheet.GetCell(table.Count + 2, 2),
                         name: "Типы операций",
                         size: 600,

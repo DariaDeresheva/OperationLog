@@ -1,7 +1,7 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
 
-namespace OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider
+namespace OperationLog.ExcelProvider.EpPlusProvider
 {
     public class EpPlusWorksheet : IExcelWorksheet
     {

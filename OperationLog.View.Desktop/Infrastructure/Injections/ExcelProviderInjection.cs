@@ -1,6 +1,7 @@
 ﻿using Ninject.Modules;
+using OperationLog.ExcelProvider;
+using OperationLog.ExcelProvider.EpPlusProvider;
 using OperationLog.ExcelProvider.ExcelProvider;
-using OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider;
 
 namespace OperationLog.Presentation.Desktop.Infrastructure.Injections
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OperationLog.ExcelProvider.ExcelProvider
+namespace OperationLog.ExcelProvider
 {
     public interface IExcelBook : IDisposable
     {

@@ -3,7 +3,7 @@ using OperationLog.Database.UnitOfWork;
 
 namespace OperationLog.BusinessLogic.Infrastructure.Injections
 {
-    public class DatabaseInjection : NinjectModule
+    public class UnitOfWorkInjection : NinjectModule
     {
         public override void Load()
         {

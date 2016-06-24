@@ -1,6 +1,6 @@
 ﻿using OfficeOpenXml;
 
-namespace OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider
+namespace OperationLog.ExcelProvider.EpPlusProvider
 {
     public class EpPlusRange : IExcelRange
     {
@@ -10,6 +10,7 @@ namespace OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider
         {
             _range = range;
         }
+
         public string GetAddress() => _range.Address;
     }
 }

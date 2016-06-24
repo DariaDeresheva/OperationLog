@@ -7,18 +7,18 @@ namespace OperationLog.BusinessLogic.Services
 {
     public class CommonService : IService
     {
-        private IUnitOfWork Database { get; }
+        private readonly IUnitOfWork _database;
 
         public CommonService(IUnitOfWork database)
         {
-            Database = database;
+            _database = database;
         }
 
-        public List<T> GetAll<T>() where T : class => Database.GetRepository<T>().GetAll().ToList();
+        public List<T> GetAll<T>() where T : class => _database.GetRepository<T>().GetAll().ToList();
 
         public List<T> GetAllWhere<T>(Func<T, bool> predicate) where T : class
-            => Database.GetRepository<T>().GetAllWhere(predicate).ToList();
+            => _database.GetRepository<T>().GetAllWhere(predicate).ToList();
 
-        public void Dispose() => Database.Dispose();
+        public void Dispose() => _database.Dispose();
     }
 }

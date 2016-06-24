@@ -1,4 +1,4 @@
-﻿namespace OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider
+﻿namespace OperationLog.ExcelProvider.EpPlusProvider
 {
     public class EpPlusProvider : IExcelProvider
     {

@@ -1,4 +1,4 @@
-﻿namespace OperationLog.ExcelProvider.ExcelProvider
+﻿namespace OperationLog.ExcelProvider
 {
     public interface IExcelRange
     {

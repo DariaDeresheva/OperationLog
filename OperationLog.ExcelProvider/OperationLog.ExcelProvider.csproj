@@ -42,16 +42,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExcelProvider\EpPlusProvider\EpPlusBook.cs" />
-    <Compile Include="ExcelProvider\EpPlusProvider\EpPlusCell.cs" />
-    <Compile Include="ExcelProvider\EpPlusProvider\EpPlusProvider.cs" />
-    <Compile Include="ExcelProvider\EpPlusProvider\EpPlusRange.cs" />
-    <Compile Include="ExcelProvider\EpPlusProvider\EpPlusWorksheet.cs" />
-    <Compile Include="ExcelProvider\IExcelBook.cs" />
-    <Compile Include="ExcelProvider\IExcelCell.cs" />
-    <Compile Include="ExcelProvider\IExcelProvider.cs" />
-    <Compile Include="ExcelProvider\IExcelRange.cs" />
-    <Compile Include="ExcelProvider\IExcelWorksheet.cs" />
+    <Compile Include="EpPlusProvider\EpPlusBook.cs" />
+    <Compile Include="EpPlusProvider\EpPlusCell.cs" />
+    <Compile Include="EpPlusProvider\EpPlusProvider.cs" />
+    <Compile Include="EpPlusProvider\EpPlusRange.cs" />
+    <Compile Include="EpPlusProvider\EpPlusWorksheet.cs" />
+    <Compile Include="IExcelBook.cs" />
+    <Compile Include="IExcelCell.cs" />
+    <Compile Include="IExcelProvider.cs" />
+    <Compile Include="IExcelRange.cs" />
+    <Compile Include="IExcelWorksheet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

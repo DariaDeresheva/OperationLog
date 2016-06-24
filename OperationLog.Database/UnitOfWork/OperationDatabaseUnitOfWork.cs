@@ -1,11 +1,12 @@
-﻿using OperationLog.Database.DatabaseContext;
+﻿using System.Data.Entity;
+using OperationLog.Database.DatabaseContext;
 using OperationLog.Database.Repositories;
 
 namespace OperationLog.Database.UnitOfWork
 {
     public class OperationDatabaseUnitOfWork : IUnitOfWork
     {
-        private readonly OperationDatabaseContext _database;
+        private readonly DbContext _database;
 
         public OperationDatabaseUnitOfWork()
         {
@@ -13,9 +14,6 @@ namespace OperationLog.Database.UnitOfWork
         }
 
         public IRepository<T> GetRepository<T>() where T : class => new CommonRepository<T>(_database);
-
-        public void SaveChanges() => _database.SaveChanges();
-
         public void Dispose() => _database.Dispose();
     }
 }

@@ -3,7 +3,7 @@ using System.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
-namespace OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider
+namespace OperationLog.ExcelProvider.EpPlusProvider
 {
     public class EpPlusBook : IExcelBook
     {

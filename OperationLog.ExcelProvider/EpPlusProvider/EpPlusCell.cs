@@ -2,7 +2,7 @@
 using System.Linq;
 using OfficeOpenXml;
 
-namespace OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider
+namespace OperationLog.ExcelProvider.EpPlusProvider
 {
     public class EpPlusCell : IExcelCell
     {
@@ -17,7 +17,7 @@ namespace OperationLog.ExcelProvider.ExcelProvider.EpPlusProvider
         public int Column => _range.Start.Column;
         public object Value => _range.Value;
 
-        public void SetFromArrays(IEnumerable<IEnumerable<object>> values)
+        public void SetFromTable(IEnumerable<IEnumerable<object>> values)
         {
             _range.LoadFromArrays(values.Select(value => value.ToArray()));
         }

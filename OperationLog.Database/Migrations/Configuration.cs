@@ -11,9 +11,5 @@ namespace OperationLog.Database.Migrations
             AutomaticMigrationsEnabled = true;
             ContextKey = "OperationLog.Database.DatabaseContext.OperationDatabaseContext";
         }
-
-        protected override void Seed(OperationDatabaseContext context)
-        {
-        }
     }
 }
