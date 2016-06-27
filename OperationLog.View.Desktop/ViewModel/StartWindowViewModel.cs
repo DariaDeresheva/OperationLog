@@ -26,22 +26,60 @@ using OpertaionLog.Database.Objects.Entities;
 
 namespace OperationLog.Presentation.Desktop.ViewModel
 {
+    /// <summary>
+    /// Класс модель представления главного окна приложения.
+    /// </summary>
+    /// <seealso cref="ObservableObject" />
+    /// <seealso cref="IDisposable" />
     public class StartWindowViewModel : ObservableObject, IDisposable
     {
+        /// <summary>
+        /// Сервис бизнес-операций.
+        /// </summary>
         private readonly IService _service = DependencyResolver.Get<IService>();
+        /// <summary>
+        /// Провайдер Excel.
+        /// </summary>
         private readonly IExcelProvider _excel = DependencyResolver.Get<IExcelProvider>();
 
+        /// <summary>
+        /// Последние выбранные операции, удовлетворяющие фильтрам.
+        /// </summary>
         private List<Operation> _latestSelectedOperations = new List<Operation>();
 
+        /// <summary>
+        /// Список пользователей.
+        /// </summary>
         private List<Selectable<User>> _users;
+        /// <summary>
+        /// Список типов пользователей.
+        /// </summary>
         private List<Selectable<UserType>> _userTypes;
+        /// <summary>
+        /// Список типов операций.
+        /// </summary>
         private List<Selectable<OperationType>> _operationTypes;
+        /// <summary>
+        /// Список программ.
+        /// </summary>
         private List<Selectable<Program>> _programs;
+        /// <summary>
+        /// Список филиалов.
+        /// </summary>
         private List<Selectable<Department>> _departments;
 
+        /// <summary>
+        /// Начальная дата «С:» в фильтре.
+        /// </summary>
         private readonly DateTime _initialDateFrom = DateTime.Now.AddMonths(-1);
+        /// <summary>
+        /// Начальная дата «По:» в фильтре.
+        /// </summary>
         private readonly DateTime _initialDateTo = DateTime.Now;
 
+        /// <summary>
+        /// Выбран ли тип операций.
+        /// </summary>
         private Func<Operation, bool> OperationTypeSelected
             =>
                 operation =>
@@ -50,10 +88,16 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                             operationType.Instanse.OperationTypeId == operation.OperationType.OperationTypeId &&
                             operationType.IsSelected);
 
+        /// <summary>
+        /// Выбран ли пользователь.
+        /// </summary>
         private Func<Operation, bool> UserSelected
             => operation => _users.Any(user => user.Instanse.UserId == operation.User.UserId && user.IsSelected);
 
 
+        /// <summary>
+        /// Выбран ли тип пользователя.
+        /// </summary>
         private Func<Operation, bool> UserTypeSelected
             =>
                 operation =>
@@ -61,12 +105,18 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                         userType =>
                             userType.Instanse.UserTypeId == operation.User.UserType.UserTypeId && userType.IsSelected);
 
+        /// <summary>
+        /// Выбрана ли программа.
+        /// </summary>
         private Func<Operation, bool> ProgramSelected
             =>
                 operation =>
                     _programs.Any(
                         program => program.Instanse.ProgramId == operation.Program.ProgramId && program.IsSelected);
 
+        /// <summary>
+        /// Выбран ли филиал.
+        /// </summary>
         private Func<Operation, bool> DepartmentSelected
             =>
                 operation =>
@@ -75,26 +125,54 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                             department.Instanse.DepartmentId == operation.Department.DepartmentId &&
                             department.IsSelected);
 
+        /// <summary>
+        /// Информация на подсказке к узлу графика.
+        /// </summary>
         private static Func<ChartPoint, string> TooltipLabelPoint
             => point => TooltipInfo(((OperationWithIndex) point.Instance).Operation);
 
+        /// <summary>
+        /// Выбранный список объектов на графическом интерфейсе.
+        /// </summary>
         private KeyValuePair<string, GridOption> _gridOptionSelected;
 
+        /// <summary>
+        /// Коллекция графиков.
+        /// </summary>
         private SeriesCollection _seriesCollection;
 
+        /// <summary>
+        /// Отображение объекта операции на координатные оси.
+        /// </summary>
         private readonly CartesianMapper<OperationWithIndex> _cartesianMapper =
             Mappers.Xy<OperationWithIndex>().X(x => x.Operation.DateTime.Ticks).Y(y => y.Index);
 
+        /// <summary>
+        /// Дата + время «С:» из фильтра для запроса.
+        /// </summary>
         private DateTime DateTimeFromQuery => DateFrom.Date.Add(TimeFrom);
+        /// <summary>
+        /// Дата + время «По:» из фильтра для запроса.
+        /// </summary>
         private DateTime DateTimeToQuery => DateTo.Date.Add(TimeTo);
 
+        /// <summary>
+        /// Заполнить график начальными значениями.
+        /// </summary>
         private ICommand InitializeChart => new Command(async _ =>
         {
             SeriesCollection = GetSeriesCollection();
             await OnSeriesResultAsync(WaitChartUpdateAsync);
         });
 
+        /// <summary>
+        /// Запрос для текстового поиска.
+        /// </summary>
         private string _textSearchQuery = string.Empty;
+        /// <summary>
+        /// Запрос для текстового поиска.
+        /// </summary>
+        /// <value>Уведомляет интерфейс об изменениях</value>
         public string TextSearchQuery
         {
             get { return _textSearchQuery; }
@@ -105,28 +183,68 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
+        /// <summary>
+        /// Дата «C:» из фильтра.
+        /// </summary>
         public DateTime DateFrom { get; set; }
+        /// <summary>
+        /// Дата «По:» из фильтра.
+        /// </summary>
         public DateTime DateTo { get; set; }
 
+        /// <summary>
+        /// Время «C:» из фильтра.
+        /// </summary>
         public TimeSpan TimeFrom { get; set; }
+        /// <summary>
+        /// Время «По:» из фильтра.
+        /// </summary>
         public TimeSpan TimeTo { get; set; }
 
+        /// <summary>
+        /// Минимальное значение для временной оси.
+        /// </summary>
         public DateTime DateTimeFromAxesLimit { get; set; }
+        /// <summary>
+        /// Максимальное значение для временной оси.
+        /// </summary>
         public DateTime DateTimeToAxesLimit { get; set; }
 
+        /// <summary>
+        /// Список объектов пользователей для фильтрации на графическом интерфейсе.
+        /// </summary>
         public ObservableCollection<Selectable<User>> UsersGrid { get; set; } =
             new ObservableCollection<Selectable<User>>();
+        /// <summary>
+        /// Список объектов типов пользователей для фильтрации на графическом интерфейсе.
+        /// </summary>
         public ObservableCollection<Selectable<UserType>> UserTypesGrid { get; set; } =
             new ObservableCollection<Selectable<UserType>>();
+        /// <summary>
+        /// Список объектов типов операций для фильтрации на графическом интерфейсе.
+        /// </summary>
         public ObservableCollection<Selectable<OperationType>> OperationTypesGrid { get; set; } =
             new ObservableCollection<Selectable<OperationType>>();
+        /// <summary>
+        /// Список объектов программ для фильтрации на графическом интерфейсе.
+        /// </summary>
         public ObservableCollection<Selectable<Program>> ProgramsGrid { get; set; } =
             new ObservableCollection<Selectable<Program>>();
+        /// <summary>
+        /// Список объектов филиалов для фильтрации на графическом интерфейсе.
+        /// </summary>
         public ObservableCollection<Selectable<Department>> DepartmentsGrid { get; set; } =
             new ObservableCollection<Selectable<Department>>();
 
+        /// <summary>
+        /// Модели выбираемых списков объектов на графическом интерфейсе.
+        /// </summary>
         public IDictionary<string, GridOption> GridOptions { get; set; }
 
+        /// <summary>
+        /// Выбранный список объектов на графическом интерфейсе.
+        /// </summary>
+        /// <value>Уведомляет интерфейс об изменении.</value>
         public KeyValuePair<string, GridOption> GridOptionSelected
         {
             get { return _gridOptionSelected; }
@@ -137,6 +255,10 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
+        /// <summary>
+        /// Коллекция графиков.
+        /// </summary>
+        /// <value>Уведомляет интерфейс об изменении.</value>
         public SeriesCollection SeriesCollection
         {
             get { return _seriesCollection; }
@@ -148,13 +270,26 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
+        /// <summary>
+        /// Максимальное значение числовой оси.
+        /// </summary>
         public double YAxisMax => _latestSelectedOperations.DistinctBy(operation => operation.User.UserId).Count();
 
+        /// <summary>
+        /// Минимальное значение числовой оси.
+        /// </summary>
+        /// <value>The y axis minimum.</value>
         public double YAxisMin { get; } = -1;
 
+        /// <summary>
+        /// Формат времени для временной оси.
+        /// </summary>
         public Func<double, string> DateTimeFormatter
             => value => new DateTime((long)value).ToString("dd.MM.yyyy HH:mm:ss");
 
+        /// <summary>
+        /// Формат имен для числовой оси.
+        /// </summary>
         public Func<double, string> NameFormatter
             =>
                 value =>
@@ -166,12 +301,18 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                             ?.Values.Points.First().Instance)
                         ?.Operation.User.UserName ?? string.Empty;
 
+        /// <summary>
+        /// Применить фильтр.
+        /// </summary>
         public ICommand ApplyFilter => new Command(async _ =>
         {
             SeriesCollection = GetSeriesCollection();
             await OnSeriesResultAsync(WaitChartUpdateAsync, NothingFoundAsync);
         });
 
+        /// <summary>
+        /// Подготовить начальные данные при запуске приложения.
+        /// </summary>
         public ICommand PrepareApplicationData => new Command(async _ =>
         {
             if (await TryConnectToDatabaseAsync())
@@ -183,12 +324,15 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
             else
             {
-                await MessageDialog("Ошибка подключения к базе данных!",
+                await MessageDialogAsync("Ошибка подключения к базе данных!",
                     "Проверьте строку подключения в конфигурационном файле.");
                 Application.Current.Shutdown();
             }
         });
 
+        /// <summary>
+        /// Сбросить фильтр.
+        /// </summary>
         public ICommand ResetFilter => new Command(_ =>
         {
             PrepareDateTimeLimits();
@@ -204,14 +348,20 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             ApplyFilter.Execute(null);
         });
 
+        /// <summary>
+        /// Сохранить отфильтрованные операции в отчет Excel.
+        /// </summary>
         public ICommand SaveToExcel => new Command(async _ =>
         {
             var filename = ExportToExcel();
             await
-                MessageDialog($@"Файл ""{filename}"" успешно сохранен!",
+                MessageDialogAsync($@"Файл ""{filename}"" успешно сохранен!",
                     $"Путь: {Path.Combine(Path.GetFullPath(filename))}");
         });
 
+        /// <summary>
+        /// Инициализировать модели выбираемых списков объектов.
+        /// </summary>
         private void PrepareGridOptions()
         {
             GridOptions = GetGridOptions();
@@ -219,6 +369,9 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             OnPropertyChanged(nameof(GridOptions));
         }
 
+        /// <summary>
+        /// Инициализировать все значения даты и времени.
+        /// </summary>
         private void PrepareDateTimeLimits()
         {
             DateFrom = DateTimeFromAxesLimit = _initialDateFrom;
@@ -231,6 +384,9 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             OnPropertyChanged(nameof(TimeTo));
         }
 
+        /// <summary>
+        /// Загрузить журналы из БД.
+        /// </summary>
         private void PrepareCollectionsFromDatabase()
         {
             _userTypes =
@@ -260,6 +416,12 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                     .ToList();
         }
 
+        /// <summary>
+        /// Асинхронно обработать результат обновления списка графиков.
+        /// </summary>
+        /// <param name="onNotEmptySeries">Асинхронная операция для выполнения, если список графиков не пуст.</param>
+        /// <param name="onEmptySeries">Асинхронная операция для выполнения, если список графиков пуст.</param>
+        /// <returns>Task.</returns>
         private async Task OnSeriesResultAsync(Func<Task> onNotEmptySeries = null, Func<Task> onEmptySeries = null)
         {
             if (_latestSelectedOperations.Any())
@@ -284,6 +446,10 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             OnPropertyChanged(nameof(DateTimeToAxesLimit));
         }
 
+        /// <summary>
+        /// Выбрать из БД операции, удовлетворяющие фильтрам.
+        /// </summary>
+        /// <returns>IEnumerable&lt;Operation&gt;.</returns>
         private IEnumerable<Operation> SelectOperations() => _latestSelectedOperations = _service.GetAllWhere<Operation>(
             operation =>
                 operation.DateTime >= DateTimeFromQuery &&
@@ -294,29 +460,53 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                 ProgramSelected(operation) &&
                 UserSelected(operation));
 
-        private static Task<ProgressDialogController> ProgressDialog(string title, string message)
+        /// <summary>
+        /// Асинхронно показать диалог загрузки.
+        /// </summary>
+        /// <param name="title">Заголовок.</param>
+        /// <param name="message">Сообщение.</param>
+        /// <returns>Task&lt;ProgressDialogController&gt;.</returns>
+        private static Task<ProgressDialogController> ProgressDialogAsync(string title, string message)
         {
             return (Application.Current.MainWindow as MetroWindow).ShowProgressAsync(title, message);
         }
 
-        private static Task<MessageDialogResult> MessageDialog(string title, string message)
+        /// <summary>
+        /// Асинхронно показать диалог сообщения.
+        /// </summary>
+        /// <param name="title">Заголовок.</param>
+        /// <param name="message">Сообщение.</param>
+        /// <returns>Task&lt;MessageDialogResult&gt;.</returns>
+        private static Task<MessageDialogResult> MessageDialogAsync(string title, string message)
         {
             return (Application.Current.MainWindow as MetroWindow).ShowMessageAsync(title, message);
         }
 
+        /// <summary>
+        /// Асинхронное ожидание обновления графиков.
+        /// </summary>
+        /// <returns>Task.</returns>
         private static async Task WaitSeriesRefreshAsync() => await Task.Delay(TimeSpan.FromSeconds(1));
 
+        /// <summary>
+        /// Асинхронное ожидание обновления графиков с диалогом загрузки.
+        /// </summary>
+        /// <returns>Task.</returns>
         private static async Task WaitChartUpdateAsync()
         {
-            var progressAlert = await ProgressDialog("Применение фильтров...", "Пожалуйста подождите...");
+            var progressAlert = await ProgressDialogAsync("Применение фильтров...", "Пожалуйста подождите...");
             progressAlert.SetIndeterminate();
             await WaitSeriesRefreshAsync();
             await progressAlert.CloseAsync();
         }
 
+        /// <summary>
+        /// Асинхронно попытаться подключиться к базе данных. Обработать результат.
+        /// </summary>
+        /// <returns>Task&lt;System.Boolean&gt;.</returns>
         private async Task<bool> TryConnectToDatabaseAsync()
         {
-            var progressAlert = await ProgressDialog("Подключение к базе данных...", "Пожалуйста подождите...");
+            var progressAlert = await ProgressDialogAsync("Подключение к базе данных...", "Пожалуйста подождите...");
             progressAlert.SetIndeterminate();
             Exception catched = null;
             await Task.Run(() =>
@@ -334,11 +524,23 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             return catched == null;
         }
 
+        /// <summary>
+        /// Асинхронно показать сообщение при неудачном поиске.
+        /// </summary>
+        /// <returns>Task.</returns>
         private static async Task NothingFoundAsync()
-            => await MessageDialog("По вашему запросу ничего не найдено!", "Попробуйте изменить параметры поиска.");
+            => await MessageDialogAsync("По вашему запросу ничего не найдено!", "Попробуйте изменить параметры поиска.");
 
+        /// <summary>
+        /// Создать объект коллекции графиков.
+        /// </summary>
+        /// <returns>SeriesCollection.</returns>
         private SeriesCollection NewSeriesCollection() => new SeriesCollection(_cartesianMapper);
 
+        /// <summary>
+        /// Получить коллекцию графиков операций.
+        /// </summary>
+        /// <returns>SeriesCollection.</returns>
         private SeriesCollection GetSeriesCollection()
         {
             var seriesValues = GetSeriesChartValues().ToList();
@@ -368,6 +570,10 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             return seriesCollection;
         }
 
+        /// <summary>
+        /// Получить значения узлов для графиков.
+        /// </summary>
+        /// <returns>IEnumerable&lt;ChartValues&lt;OperationWithIndex&gt;&gt;.</returns>
         private IEnumerable<ChartValues<OperationWithIndex>> GetSeriesChartValues()
         {
             var operationsFiltered = SelectOperations();
@@ -403,6 +609,14 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
+        /// <summary>
+        /// Создать линейный график.
+        /// </summary>
+        /// <param name="values">Значения узлов.</param>
+        /// <param name="title">Название.</param>
+        /// <param name="pointDiameter">Диаметр узла.</param>
+        /// <param name="stroke">Цвет линии.</param>
+        /// <returns>LineSeries.</returns>
         private static LineSeries NewLineSeries(IChartValues values, string title, double pointDiameter, Brush stroke)
             => new LineSeries
             {
@@ -415,6 +629,11 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                 Stroke = stroke
             };
 
+        /// <summary>
+        /// Получить информацию для подсказки к узлу графика операций.
+        /// </summary>
+        /// <param name="operation">Операция.</param>
+        /// <returns>System.String.</returns>
         private static string TooltipInfo(Operation operation)
         {
             var info = new[]
@@ -427,6 +646,10 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             return string.Join(Environment.NewLine, info);
         }
 
+        /// <summary>
+        /// Получить модели выбираемых списков объектов.
+        /// </summary>
+        /// <returns>IDictionary&lt;System.String, GridOption&gt;.</returns>
         private IDictionary<string, GridOption> GetGridOptions() => new Dictionary<string, GridOption>
         {
             ["Пользователи"] = GridOption.Create(UsersGrid, _users, user => user.UserName),
@@ -436,6 +659,9 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             ["Филиалы"] = GridOption.Create(DepartmentsGrid, _departments, department => department.DepartmentName),
         };
 
+        /// <summary>
+        /// Инициализировать обработчики событий изменения свойств.
+        /// </summary>
         private void PrepareEventHandlers() => PropertyChanged += (s, e) =>
         {
             switch (e.PropertyName)
@@ -451,6 +677,10 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         };
 
+        /// <summary>
+        /// Получить значения для экспорта в Excel.
+        /// </summary>
+        /// <returns>IEnumerable&lt;ValueToExcelWorksheet&gt;.</returns>
         private IEnumerable<ValueToExcelWorksheet> ValuesToExcel()
             =>
                 _latestSelectedOperations.OrderBy(operation => operation.OperationType.TypeName)
@@ -478,6 +708,10 @@ namespace OperationLog.Presentation.Desktop.ViewModel
                                         })
                         });
 
+        /// <summary>
+        /// Экспортировать отфильтрованные операции в отчет Excel.
+        /// </summary>
+        /// <returns>Название файла отчета.</returns>
         private string ExportToExcel()
         {
             using (var book = _excel.CreateBook($"Отчет {DateTime.Now.ToString(@"dd.MM.yyyy HH-mm-ss")}.xlsx"))
@@ -513,6 +747,9 @@ namespace OperationLog.Presentation.Desktop.ViewModel
             }
         }
 
+        /// <summary>
+        /// Освободить ресурсы БД.
+        /// </summary>
         public void Dispose()
         {
             _service?.Dispose();

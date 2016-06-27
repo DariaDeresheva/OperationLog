@@ -3,8 +3,15 @@ using OpertaionLog.Database.Objects.Entities;
 
 namespace OperationLog.Database.Configurations
 {
+    /// <summary>
+    /// Класс является конфигурацией сущностей пользователей.
+    /// </summary>
+    /// <seealso cref="System.Data.Entity.ModelConfiguration.EntityTypeConfiguration{User}" />
     public class UserConfiguration : EntityTypeConfiguration<User>
     {
+        /// <summary>
+        /// Конструктор <see cref="UserConfiguration" />. Конфигурирование сущности <see cref="User" />.
+        /// </summary>
         public UserConfiguration()
         {
             HasMany(user => user.Operations)

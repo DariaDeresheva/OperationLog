@@ -3,8 +3,15 @@ using OpertaionLog.Database.Objects.Entities;
 
 namespace OperationLog.Database.Configurations
 {
+    /// <summary>
+    /// Класс является конфигурацией сущностей программ.
+    /// </summary>
+    /// <seealso cref="System.Data.Entity.ModelConfiguration.EntityTypeConfiguration{Program}" />
     public class ProgramConfiguration : EntityTypeConfiguration<Program>
     {
+        /// <summary>
+        /// Конструктор <see cref="ProgramConfiguration" />. Конфигурирование сущности <see cref="Program" />.
+        /// </summary>
         public ProgramConfiguration()
         {
             HasMany(program => program.Operations)
